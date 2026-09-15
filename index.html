@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Documentos da Obra — Kalfer</title>
+<title>Documentos SST Kalfer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@
 
   /* ---------- Painel de indicadores (dashboard) ---------- */
   .stats-grid{
-    display:grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px;
+    display:grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px;
   }
   @media (max-width: 900px){ .stats-grid{ grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 560px){ .stats-grid{ grid-template-columns: repeat(2, 1fr); } }
@@ -563,7 +563,6 @@ function renderStats(){
     { key: 'red',    cls: 'red',    dot: 'red',    label: 'Atrasados (documentos vencidos)', value: stats.red },
     { key: 'yellow', cls: 'yellow', dot: 'yellow', label: `A vencer (próx. ${ALERT_WINDOW_DAYS} dias)`, value: stats.yellow },
     { key: 'green',  cls: 'green',  dot: 'green',  label: 'Em dia com a documentação', value: stats.green },
-    { key: 'grey',   cls: 'grey',   dot: 'grey',   label: 'Sem documentos cadastrados', value: stats.grey },
   ];
   return `
     <div class="stats-grid">
@@ -1063,7 +1062,7 @@ function render(){
       <div style="display:flex; align-items:center; gap:14px;">
         <img src="${LOGO_DATA_URI}" alt="Logo Kalfer" style="width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0;">
         <div>
-          <h1>Documentos da Obra</h1>
+          <h1>Documentos SST Kalfer</h1>
           <div class="sub">Painel de acompanhamento de documentos e vencimentos da equipe — sincronizado na nuvem</div>
         </div>
       </div>
@@ -1112,8 +1111,8 @@ function renderLogin(){
         <div class="brand">
           <img src="${LOGO_DATA_URI}" alt="Logo Kalfer">
           <div>
-            <h1>Documentos da Obra</h1>
-            <div class="sub">Kalfer — acesso restrito</div>
+            <h1>Documentos SST Kalfer</h1>
+            <div class="sub">Acesso restrito</div>
           </div>
         </div>
         ${loginError ? `<div class="login-error">${escapeHtml(loginError)}</div>` : ''}
