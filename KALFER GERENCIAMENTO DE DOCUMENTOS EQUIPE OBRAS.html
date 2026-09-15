@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentos da Obra — Kalfer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #EBE7DD;
+    --surface: #FFFFFF;
+    --surface-2: #F5F2EA;
+    --ink: #21262B;
+    --ink-soft: #5B6268;
+    --line: #D8D2C4;
+    --blueprint: #2E4A66;
+    --blueprint-soft: #E4EAF0;
+    --yellow: #C98A00;
+    --yellow-bg: #FBF0D9;
+    --red: #B23A18;
+    --red-bg: #F7E3DA;
+    --green: #3F6B4C;
+    --green-bg: #E3EDE5;
+    --radius: 3px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    min-height: 100vh;
+    position: relative;
+  }
+  body::before{
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: var(--watermark-img, none);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: min(46vw, 440px);
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .app{ max-width: 1180px; margin: 0 auto; padding: 28px 20px 60px; position: relative; z-index: 1; }
+
+  /* ---------- Header ---------- */
+  .header{
+    display:flex; align-items:flex-end; justify-content:space-between;
+    gap: 16px; flex-wrap: wrap;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px; margin-bottom: 20px;
+  }
+  .header h1{
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700; font-size: 38px; letter-spacing: 0.3px;
+    margin: 0; line-height: 1;
+  }
+  .header .sub{ color: var(--ink-soft); font-size: 14px; margin-top: 6px; }
+  .btn{
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 600; font-size: 14px;
+    border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink);
+    padding: 9px 16px; border-radius: var(--radius); cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover{ background: var(--ink); color: var(--surface); }
+  .btn.primary{ background: var(--blueprint); border-color: var(--blueprint); color: #fff; }
+  .btn.primary:hover{ background: #223a52; }
+  .btn.ghost{ border-color: var(--line); font-weight: 500; }
+  .btn.danger{ border-color: var(--red); color: var(--red); background:none; }
+  .btn.danger:hover{ background: var(--red); color:#fff; }
+  .btn.small{ padding: 5px 10px; font-size: 12.5px; }
+
+  /* ---------- Alerts ---------- */
+  .alerts{ margin-bottom: 22px; }
+  .alerts-head{
+    display:flex; align-items:center; gap: 10px; margin-bottom: 8px;
+  }
+  .alerts-head h2{
+    font-family:'Barlow Condensed', sans-serif; font-size: 20px; font-weight:600; margin:0;
+  }
+  .alerts-count{
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    background: var(--red); color:#fff; padding: 2px 8px; border-radius: 20px;
+  }
+  .alerts-count.ok{ background: var(--green); }
+  .alert-row{
+    display:flex; align-items:center; gap: 12px;
+    background: var(--surface); border-left: 4px solid var(--red);
+    padding: 10px 14px; margin-bottom: 6px; border-radius: var(--radius);
+    font-size: 14px;
+  }
+  .alert-row.warn{ border-left-color: var(--yellow); }
+  .alert-row .emp{ font-weight: 600; }
+  .alert-row .msg{ color: var(--ink-soft); flex:1; }
+  .alert-row .days{ font-family:'IBM Plex Mono', monospace; font-size: 12.5px; font-weight:600; }
+  .alert-row.warn .days{ color: var(--yellow); }
+  .alert-row .days.late{ color: var(--red); }
+  .alerts-empty{
+    background: var(--surface); border-left: 4px solid var(--green);
+    padding: 10px 14px; border-radius: var(--radius); font-size: 14px; color: var(--ink-soft);
+  }
+
+  /* ---------- Painel de indicadores (dashboard) ---------- */
+  .stats-grid{
+    display:grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px;
+  }
+  @media (max-width: 900px){ .stats-grid{ grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 560px){ .stats-grid{ grid-template-columns: repeat(2, 1fr); } }
+  .stat-card{
+    appearance:none; -webkit-appearance:none; width:100%; text-align:left;
+    background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--line);
+    border-radius: var(--radius); padding: 12px 14px; cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif; transition: box-shadow .15s;
+  }
+  .stat-card:hover{ box-shadow: 0 1px 8px rgba(33,38,43,0.12); }
+  .stat-card.active{ box-shadow: 0 0 0 2px var(--ink) inset; }
+  .stat-card .stat-label{
+    font-size: 11.5px; font-weight:600; color: var(--ink-soft);
+    display:flex; align-items:center; gap:7px; margin-bottom: 8px; line-height:1.25;
+  }
+  .stat-card .stat-value{
+    font-family:'Barlow Condensed', sans-serif; font-weight:700; font-size: 32px; line-height:1; color: var(--ink);
+  }
+  .stat-card.total{ border-left-color: var(--blueprint); }
+  .dot.blue{ background: var(--blueprint); }
+  .stats-clear{
+    font-size: 12.5px; color: var(--blueprint); cursor:pointer; text-decoration: underline;
+    margin: -10px 0 18px; display:inline-block; background:none; border:none; padding:0; font-family:'IBM Plex Sans',sans-serif;
+  }
+
+  /* ---------- Layout ---------- */
+  .layout{ display:grid; grid-template-columns: 280px 1fr; gap: 20px; align-items:start; }
+  @media (max-width: 760px){ .layout{ grid-template-columns: 1fr; } }
+
+  .panel{ background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+  .panel-head{
+    padding: 14px 16px; border-bottom: 1px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .panel-head h2{ font-family:'Barlow Condensed', sans-serif; font-size: 18px; font-weight:600; margin:0; }
+
+  /* employee list */
+  .emp-list{ list-style:none; margin:0; padding: 6px; }
+  .emp-item{
+    display:flex; align-items:center; gap:10px;
+    padding: 10px 10px; border-radius: var(--radius); cursor:pointer;
+    border: 1px solid transparent;
+  }
+  .emp-item:hover{ background: var(--surface-2); }
+  .emp-item.active{ background: var(--blueprint-soft); border-color: var(--blueprint); }
+  .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .dot.green{ background: var(--green); }
+  .dot.yellow{ background: var(--yellow); }
+  .dot.red{ background: var(--red); }
+  .dot.grey{ background: #C6C0B3; }
+  .emp-item .name{ font-weight:600; font-size:14.5px; }
+  .emp-item .role{ font-size:12px; color: var(--ink-soft); }
+  .emp-empty{ padding: 20px 16px; color: var(--ink-soft); font-size: 14px; }
+
+  /* detail */
+  .detail-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:12px; flex-wrap:wrap;
+  }
+  .detail-head .who h2{ margin:0 0 2px; }
+  .detail-head .who .role{ color: var(--ink-soft); font-size: 13.5px; }
+  .detail-actions{ display:flex; gap:8px; }
+
+  .doc-table{ width:100%; border-collapse: collapse; }
+  .doc-table th{
+    text-align:left; font-size: 12px; font-weight:600; color: var(--ink-soft);
+    padding: 10px 16px; border-bottom: 1px solid var(--line);
+  }
+  .doc-table td{ padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 14px; vertical-align: middle; }
+  .doc-table tr:last-child td{ border-bottom:none; }
+  .status-pill{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size: 12.5px; font-weight:600; padding: 3px 10px; border-radius: 20px;
+  }
+  .status-pill.green{ background: var(--green-bg); color: var(--green); }
+  .status-pill.yellow{ background: var(--yellow-bg); color: var(--yellow); }
+  .status-pill.red{ background: var(--red-bg); color: var(--red); }
+  .doc-empty{ padding: 30px 16px; text-align:center; color: var(--ink-soft); font-size: 14px; }
+  .row-actions{ display:flex; gap:6px; }
+  .icon-btn{
+    border:none; background:none; cursor:pointer; color: var(--ink-soft); font-size: 13px;
+    padding: 3px 6px; border-radius: var(--radius);
+  }
+  .icon-btn:hover{ background: var(--surface-2); color: var(--ink); }
+
+  /* add document form */
+  .add-doc{ padding: 14px 16px; border-top: 1px solid var(--line); background: var(--surface-2); }
+  .add-doc-toggle{ font-size: 14px; font-weight:600; color: var(--blueprint); cursor:pointer; user-select:none; }
+  .form-grid{
+    display:grid; grid-template-columns: 1.3fr 1fr 1fr auto; gap: 10px; margin-top: 12px; align-items:end;
+  }
+  @media (max-width: 620px){ .form-grid{ grid-template-columns: 1fr; } }
+  .field label{ display:block; font-size: 11.5px; font-weight:600; color: var(--ink-soft); margin-bottom: 4px; text-transform: none; }
+  .field input, .field select{
+    width:100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--radius);
+    font-family:'IBM Plex Sans',sans-serif; font-size: 14px; background:#fff; color: var(--ink);
+  }
+  .field input:focus, .field select:focus{ outline: 2px solid var(--blueprint); outline-offset: 1px; }
+
+  /* modal */
+  .overlay{
+    position: fixed; inset:0; background: rgba(33,38,43,0.45);
+    display:flex; align-items:center; justify-content:center; z-index: 50; padding: 16px;
+  }
+  .modal{
+    background: var(--surface); border-radius: var(--radius); width: 100%; max-width: 360px;
+    padding: 22px; border: 1px solid var(--line);
+  }
+  .modal h3{ font-family:'Barlow Condensed',sans-serif; font-size: 20px; margin: 0 0 14px; }
+  .modal .field{ margin-bottom: 12px; }
+  .modal-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top: 16px; }
+
+  .empty-state{
+    text-align:center; padding: 60px 20px; color: var(--ink-soft);
+  }
+  .empty-state h3{ font-family:'Barlow Condensed',sans-serif; color: var(--ink); font-size: 22px; margin-bottom: 6px; }
+  .empty-state p{ font-size: 14px; max-width: 340px; margin: 0 auto 16px; }
+
+  .toast{
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color:#fff; padding: 9px 18px; border-radius: var(--radius);
+    font-size: 13.5px; z-index: 100; opacity:0; pointer-events:none; transition: opacity .2s;
+  }
+  .toast.show{ opacity: 1; }
+  .loading{ padding: 40px; text-align:center; color: var(--ink-soft); font-size: 14px; }
+
+  /* ---------- Login ---------- */
+  .login-wrap{
+    min-height: 100vh; display:flex; align-items:center; justify-content:center; padding: 20px;
+  }
+  .login-card{
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 32px 28px; width: 100%; max-width: 360px;
+  }
+  .login-card .brand{ display:flex; align-items:center; gap:12px; margin-bottom: 22px; }
+  .login-card .brand img{ width:44px; height:44px; border-radius:8px; object-fit:cover; }
+  .login-card h1{
+    font-family:'Barlow Condensed', sans-serif; font-weight:700; font-size: 26px; margin:0;
+  }
+  .login-card .sub{ color: var(--ink-soft); font-size: 13px; margin-top: 2px; }
+  .login-card form{ margin-top: 8px; }
+  .login-card .field{ margin-bottom: 14px; }
+  .login-card .btn{ width:100%; margin-top: 4px; }
+  .login-error{
+    background: var(--red-bg); color: var(--red); font-size: 13px; padding: 8px 12px;
+    border-radius: var(--radius); margin-bottom: 14px;
+  }
+  .login-note{ text-align:center; margin-top: 14px; }
+  .login-note a{ color: var(--blueprint); font-size: 12.5px; cursor:pointer; text-decoration: underline; }
+
+  /* ---------- User bar / history ---------- */
+  .user-bar{
+    display:flex; align-items:center; gap: 10px; flex-wrap: wrap;
+  }
+  .user-badge{
+    font-size: 12.5px; color: var(--ink-soft); display:flex; align-items:center; gap:6px;
+  }
+  .user-badge .who{ font-weight:600; color: var(--ink); }
+  .history-table{ width:100%; border-collapse: collapse; }
+  .history-table th{
+    text-align:left; font-size: 11.5px; font-weight:600; color: var(--ink-soft);
+    padding: 8px 12px; border-bottom: 1px solid var(--line); position: sticky; top:0; background: var(--surface);
+  }
+  .history-table td{ padding: 9px 12px; border-bottom: 1px solid var(--line); font-size: 13px; vertical-align: top; }
+  .history-action{
+    display:inline-block; font-size: 11px; font-weight:600; padding: 2px 8px; border-radius: 20px;
+  }
+  .history-action.insert{ background: var(--green-bg); color: var(--green); }
+  .history-action.update{ background: var(--yellow-bg); color: var(--yellow); }
+  .history-action.delete{ background: var(--red-bg); color: var(--red); }
+  .history-when{ font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--ink-soft); white-space:nowrap; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading">Carregando painel...</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const LOGO_DATA_URI = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAACgKADAAQAAAABAAACgAAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgCgAKAAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMABgYGBgYGCgYGCg4KCgoOEg4ODg4SFxISEhISFxwXFxcXFxccHBwcHBwcHCIiIiIiIicnJycnLCwsLCwsLCwsLP/bAEMBBwcHCwoLEwoKEy4fGh8uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLv/dAAQAKP/aAAwDAQACEQMRAD8AwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoHWilX7w+tAH//QwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApyfeH1ptOj++v1FAnsf/9HCooor54/agooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiul0Twpq+uMDbx7Iu8j8L+HrVRi5OyRjXr06MeerKyOaor2bVPBGmaF4Yvbo5nuVj/1jdAcjoK8Zq6tJ07KRzYDMaWMUpUdk7BRRRWR3hRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABT4v9Yv1FMqSH/Wp/vChCex/9LCooor54/agooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoorR03SdR1ebyNPhaVu5H3R9T0ppN6IipUjCLnN2RnVuaP4c1bXJNtjCSneRuEH4/4V6roHw1tLbbcaywnk6+WPuD6+tenQwRW8YigQIi8AKMAV3UsE3rM+UzDimELwwiu+72/4J55oPw507Tys+pH7VMOcfwA/TvXoqRpGgSNQqjgADAFPpa74U4wVoo+MxWMrYmXPWlc5Xxt/yK1//wBc/wCor5kr6b8bf8itf/8AXP8AqK+ZK8/HfEj7XhH/AHep6/oFFFFcJ9YFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFSwf65P8AeH86iqWD/Xx/7w/nQhS2Z//TwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiipIoZZ5BFChd26KoyT+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LtlxzE/DD/H8K6Ovj2OSSJxJGxVh0IOCK9J0D4j6hY7bfVgbmIcb/wCMD+tehSxqekz4vMeFpwvPCO67df8AgnvVFZOla3pusw+dp8yyDuvRh9RWtXamnqj5SdOUJOM1ZhRRRTICiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDg/iR/yK0v8A10j/APQhXztX0T8SP+RWl/66R/8AoQr52rysd8aP0PhT/dJf4n+SCiiiuM+nCiiigAooooAKKKKACiiigAqa3/4+I/8AeH86hqa3/wCPiP8A3h/OmtyZbM//18Kiiivnj9qCiiigAooooAKKKKACiiigAooooAK+vrX/AI9ov9xf5V8g19fWv/HtF/uL/KvQwH2j4vjDaj8/0J6KKK9E+JCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDG1bQdL1qLyr+EP6MOGH0NeO6/wDDjULDdcaSxuohzsPEg/oa97orGpQhPdHp4DNsRhH+7lp2ex8eSRvE5jkUqynBDDBH1FNr6g1zwrpGvIftcQWXHEqcOPx7/jXi+veA9X0fdNbj7Vbj+JB8wH+0v+FedVwsoarVH3GXcQ4fE2hP3Zee3yZw9FFFcp75Ytbu5sphPaSNE69GU4NeqaF8TZUK2+upvXp5yDkf7y9/wryOitadaUPhZwY3LcPi1atH59T63sdSstSgFxYyrNGe6np9R2q7XyVp2qX+lTi40+ZonHoeD9R0Nev6B8S7a422+uJ5L9PNXlD9R1FejSxcZaS0Z8RmPDVehedH3o/ier0VDBcQXMSzW7rIjchlOQfxFTV1nzjTWjCiiigQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAHB/Ej/AJFaX/rpH/6EK+dq+ifiR/yK0v8A10j/APQhXztXlY740fofCn+6S/xP8kFFFFcZ9OFFFFABRRRQAUUUUAFFFFABUtv/AK+P/eH86iqWD/Xp/vD+dCFLZn//0MKiiivnj9qCiiigAooooAKKKKACiiigAooooAK+vrX/AI9ov9xf5V8g19fWv/HtF/uL/KvQwH2j4vjDaj8/0J6KKK9E+JCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKTGetLRQBxW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yivN9B+Ium6ltt9S/wBEnPGT/qyfr2/GvRkdXUMhDAjII5Br0IVIzV4s+LxODrYeXJWjZjqKKKs5gooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBCARg1wuv+AtI1jdPbj7LcHncg+Un/aWu7oqZwUlaSN8PiatCXPRlZny3rfhfV9Bcm8i3RZ4lTlD9fT8a56vsGSNJUMcihlbggjINea6/wDDewvd1xpBFtKednWMn6dvwrz6uCa1gfZ5dxTGVoYtWfdbHhFFamqaLqejTeTqMLR+jdVb6HpWXXC4tOzPradWFSKnTd0FdBovifV9CcGzlJjzzE/KH8O34Vz9FOMnF3iya1CnWi4VY3R3mtfEHWdVTyLfFpERhhGfmPr83XH0rgySxyTknvRRTnUlN3kzPDYOjh48lGNgoooqDpCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKB1oooA/9TCooor54/agooooAKKKKACiiigAooooAKKKKACiius1nwZrOkRi52efbkBvMjGcAjPzDqKpQbTaRhVxNKnKMKkrN7HJ0UUVJuFdPofi7WNBYLbyeZD3iflfw9PwrmKKqM3F3izGvh6daPJVjdH0hoPjnR9a2ws32a4P/LOQ8E/7LdDXaZr47yRyK7fQfHer6PtgnP2q3H8Dn5gP9lq76WN6VD47MeFWrzwb+T/AEZ9HUVzWieK9H15ALSTbLjmJ+GH09fwrpK74yTV0fIVaM6UnCorMWiiimZhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAFa6s7W9ha3u41ljbqrDIryfXvhmrbrjQX2nr5Lnj/AIC3b8a9horOpSjNWkjtweY18LLmoyt5dD5EvbG806c219E0Mg7MMfl6iqtfWepaRp2rQG31CFZV7ZHI9weorx7X/hrd2m640VvPjHPlNw4+h6GvOq4OUdY6o+3y7iajWtCv7svw/wCAeW0U+WKWCQwzoUdeCrDBH4GmVxn0qaaugooooGFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/1cKiiivnj9qCiiigAooooAKKKKACiiigAooooAK+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UAFFFFAHk3xX/wCPGx/66t/6DXide2fFf/jxsf8Arq3/AKDXideRjP4jP0vhn/cY+r/MKKKK5T3wooooAKKKKACiiigAooooAKmt/wDj4j/3h/Ooamt/+PiP/eH86ETLZn//18Kiiivnj9qCiiigAooooAKKKKACiiigAooooAK+j9V8aaPoVskTv59wEX91HyQcfxHoP5184Ucnk1vSrumnbqeXmOVU8bKDqvSN9O97HWa74z1nXSY5H8iA9Io+Bj/aPU1ydFFZTm5O8mduHw1KhHkoxsgoooqTcKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACtPS9Z1LRpvP06Zoz3HVW+o6Gsyimm07oipTjUi4TV0e66D8SbK822+sqLaU8eYOYz9e6/yr0yKWOaNZYmDowyGU5BH1r4+rf0XxNq+hODZSny88xNyh/Dt9RXdSxrWkz5PMeFoSvPCOz7PY+paWuB0Dx/pGrbYLs/ZLg8bXPyMf8AZb/Gu9BBGRyDXoQnGSvFnxmIwtXDy5K0bMWiiiqOcKKKKAPJviv/AMeNj/11b/0GvE69s+K//HjY/wDXVv8A0GvE68jGfxGfpfDP+4x9X+YUUUVynvhRRRQAUUUUAFFFFABRRRQAVNb/APHxH/vD+dQ1Nb/8fEf+8P50ImWzP//QwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArr9B8a6zoZWIP8AaLcf8spDnA/2T1H8q5CiqhNxd4swxGGpV48laN0fTGg+MdH10COKTyZz1ik4P4Hoa6zNfHgJUhgcEdDXf6D8QtV0vbBf/wClwDj5j+8Uezd/xr0KWNT0qHxmYcLSjeeEd12e/wAmfQtFYWjeI9J12PdYTAvj5o24cfUf4Vu13Jpq6Pk6lKdOThUVmeTfFf8A48bH/rq3/oNeJ17Z8V/+PGx/66t/6DXideTjP4jP0fhn/cY+r/MKKKK5T3wooooAKKKKACiiigAooooAKmt/+PiP/eH86hqa3/4+I/8AeH86ETLZn//RwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAJIZpreRZoHMbqchlOCPxFen6D8Sru222+tp58Y481eHH1HQ/zryyitKdWUHeLOLGZfQxUeWtG/n1PW/iLq2n6vpVhcafMsqea2cdR8vcdRXklFFFWp7SXMxZfgY4Sj7CLutQooorM7gooooAKKKKACiiigAooooAKmt/+PiP/AHh/Ooamt/8Aj4j/AN4fzoRMtmf/0sKiiivnj9qCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKmt/8Aj4j/AN4fzqGprf8A4+I/94fzoRMtmf/TwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqa3/wCPiP8A3h/Ooamt/wDXx/7w/nTRMtmf/9TCooor54/agooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACpbf/AF8f+8P51FUtv/r4/wDeH86ETLZn/9XCoq8FT+6KkCx/3R+VeByn7M6nkZtFaoSL+4v5U8JF/cX8qOUn23kY9FbOyH+4v5UmyL+4v5UcovbrsY9FaxWL+4v5UwrH/cH5Uco/beRmUVoFY/7o/KmEJ/dFKxXtPIpUVZIX0FMO30FFiuYhoqTj0pvFFh3G0UppKVhhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUtLxQK42ipBj0pw2+gp2C5DRVkBfQU8BP7oosS5lOitELH/dH5VKFi/uL+VPlJdW3QyaK21SH/AJ5r+VTrHb/881/IU+Qh4hLoc7RXVLDbf88k/IVYSC07wp/3yKfszJ4xLocbRXeLbWX/ADwj/wC+RVlLSwPW3i/75FV7HzM3mMV9k86or09LLTjj/Rov++BVlLDTD1tYf++F/wAKfsH3MXm8V9lnk9FewLp2l4/49If++F/wqcaZpX/PpD/3wv8AhVfVn3M3ncF9hnjFFe1DS9J/584f+/a/4Uf2XpP/AD5w/wDfC/4UfVn3J/t2H8jPFaK9nbTNK7WkP/fC/wCFVn03TB0tYf8Avhf8KPqz7lLO4P7DPIaK9Sk0/TgOLaL/AL4H+FUZLKxHSCP/AL5FS6D7m0c1i/ss87qWD/Xx/wC8P512ElraDOIU/wC+RVF4IFIKxqCPQCp9nY6FjFJWsf/WzQaeGquDTt1eAfsjiWA1O3e9V80bqdxcpY30bveoN1JuouLkJi3vTC1R7qaTRcpRHlqaWphNNJpXKSHE00mkzSE0ikhc0maSigqwUUUUgCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApc0lFMB2aUGmUoNAmiQGnhqhzSg0EtFgNUob3qoGp4anchxLqv71Mr+9UA1SB6q5nKBpLJ71YSTjrWWr81MslUmYSpmukvTmraS+9YiyVYSWrTOadI3Ul6c1bSb3rBSWrKTVakck6JvJNx1qws3vWEs3FWVmq1I5Z0TaEvvS+b71lCanedVcxi6JotL71XeTrzVUyiomlpORUaQ+R+OtUZH5pXk4qpI9Q2ddOmRSNwaz5DViRutUpGrJs76cT/9k=";
+(function setFavicon(){
+  var link = document.createElement('link');
+  link.rel = 'icon';
+  link.href = LOGO_DATA_URI;
+  document.head.appendChild(link);
+})();
+document.documentElement.style.setProperty('--watermark-img', `url("${LOGO_DATA_URI}")`);
+const ALERT_WINDOW_DAYS = 30;
+const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB por anexo
+const DOC_TYPES = ["ASO", "NR-35 (Altura)", "NR-18 (Construção)", "NR-10 (Elétrica)", "NR-33 (Espaço Confinado)", "NR-06 (EPI)", "CNH", "Carteira de Trabalho", "Contrato de Trabalho", "Outro"];
+
+function docTypeDatalist(){
+  return `<datalist id="doc-types-list">${DOC_TYPES.map(t => `<option value="${escapeHtml(t)}">`).join('')}</datalist>`;
+}
+
+/* ---------- Conexão com Supabase (banco de dados na nuvem) ---------- */
+const SUPABASE_URL = 'https://cytygqcrzcdhhskwjgit.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_eZ5MV_CSPL84nXqrBZ8dYA_DTt7PPD_';
+const REST = `${SUPABASE_URL}/rest/v1`;
+const STORAGE = `${SUPABASE_URL}/storage/v1`;
+const AUTH = `${SUPABASE_URL}/auth/v1`;
+const SESSION_KEY = 'kalfer_docs_session';
+
+/* ---------- Sessão / autenticação ---------- */
+let session = null; // { access_token, refresh_token, expires_at, email }
+let loginError = '';
+let loginBusy = false;
+let historyOpen = false;
+let historyRows = [];
+let historyLoading = false;
+let historyError = '';
+
+function loadSession(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    if(raw) session = JSON.parse(raw);
+  }catch(e){ session = null; }
+}
+function saveSession(){
+  try{ localStorage.setItem(SESSION_KEY, JSON.stringify(session)); }catch(e){ /* ignora */ }
+}
+function clearSession(){
+  session = null;
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){ /* ignora */ }
+}
+
+function sbHeaders(extra){
+  const headers = { apikey: SUPABASE_KEY };
+  if(session && session.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+  return Object.assign(headers, extra || {});
+}
+
+async function refreshSession(){
+  if(!session || !session.refresh_token) return false;
+  try{
+    const res = await fetch(`${AUTH}/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: session.refresh_token })
+    });
+    if(!res.ok) return false;
+    const data = await res.json();
+    session = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+      email: data.user?.email || session.email
+    };
+    saveSession();
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+async function ensureFreshSession(){
+  if(!session) return false;
+  if(!session.expires_at || session.expires_at - Date.now() < 60000){
+    return await refreshSession();
+  }
+  return true;
+}
+
+/* Wrapper de fetch autenticado: garante token válido e trata expiração/401.
+   Sempre recalcula apikey/Authorization com o token mais atual, mesmo que o
+   chamador já tenha montado os headers antes de um possível refresh. */
+async function apiFetch(url, options){
+  await ensureFreshSession();
+  const extraHeaders = stripAuth((options && options.headers) || {});
+  const opts = Object.assign({}, options, { headers: sbHeaders(extraHeaders) });
+  let res = await fetch(url, opts);
+  if(res.status === 401){
+    const refreshed = await refreshSession();
+    if(refreshed){
+      opts.headers = sbHeaders(extraHeaders);
+      res = await fetch(url, opts);
+    }
+    if(res.status === 401){
+      clearSession();
+      showToast('Sessão expirada. Faça login novamente.');
+      render();
+    }
+  }
+  return res;
+}
+
+function stripAuth(headers){
+  const h = Object.assign({}, headers);
+  delete h.apikey;
+  delete h.Authorization;
+  return h;
+}
+
+async function loginWithPassword(email, password){
+  loginBusy = true; loginError = ''; render();
+  try{
+    const res = await fetch(`${AUTH}/token?grant_type=password`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim(), password })
+    });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok){
+      loginError = res.status === 400 ? 'E-mail ou senha incorretos.' : (data.error_description || data.msg || 'Não foi possível entrar. Tente novamente.');
+      loginBusy = false;
+      render();
+      return;
+    }
+    session = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+      email: data.user?.email || email.trim()
+    };
+    saveSession();
+    loginBusy = false;
+    load();
+  }catch(e){
+    loginError = 'Falha de conexão. Verifique sua internet e tente novamente.';
+    loginBusy = false;
+    render();
+  }
+}
+
+async function logout(){
+  try{
+    if(session && session.access_token){
+      await fetch(`${AUTH}/logout`, { method: 'POST', headers: sbHeaders() });
+    }
+  }catch(e){ /* ignora */ }
+  clearSession();
+  state = { employees: [], documents: [] };
+  selectedEmployeeId = null;
+  historyOpen = false;
+  render();
+}
+
+async function requestPasswordReset(email){
+  try{
+    await fetch(`${AUTH}/recover`, {
+      method: 'POST',
+      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.trim() })
+    });
+  }catch(e){ /* ignora */ }
+  showToast('Se o e-mail existir, enviamos um link para redefinir a senha.');
+}
+
+/* ---------- Histórico de alterações ---------- */
+async function openHistory(){
+  historyOpen = true;
+  historyError = '';
+  render();
+  await loadHistory();
+}
+
+async function loadHistory(){
+  historyLoading = true; render();
+  try{
+    const res = await apiFetch(`${REST}/audit_log?select=*&order=changed_at.desc&limit=300`, { headers: sbHeaders() });
+    if(!res.ok) throw new Error('Falha ao carregar histórico');
+    historyRows = await res.json();
+    historyError = '';
+  }catch(e){
+    console.error('Falha ao carregar histórico', e);
+    historyRows = [];
+    historyError = 'Não foi possível carregar o histórico de alterações.';
+  }
+  historyLoading = false;
+  render();
+}
+
+function closeHistory(){
+  historyOpen = false;
+  document.getElementById('history-overlay')?.remove();
+  render();
+}
+
+let state = { employees: [], documents: [] };
+let selectedEmployeeId = null;
+let showAddDocForm = false;
+let selectedAttachmentIds = new Set();
+let selectedEmployeeIdsForZip = new Set();
+let statusFilter = null; // null | 'red' (atrasados) | 'yellow' (a vencer) | 'green' (em dia) | 'grey' (sem documentos)
+
+const app = document.getElementById('app');
+
+function daysUntil(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr + 'T00:00:00');
+  return Math.round((target - today) / 86400000);
+}
+
+function statusFor(dateStr){
+  const d = daysUntil(dateStr);
+  if(d < 0) return 'red';
+  if(d <= ALERT_WINDOW_DAYS) return 'yellow';
+  return 'green';
+}
+
+function employeeStatus(empId){
+  const docs = state.documents.filter(d => d.employee_id === empId);
+  if(docs.length === 0) return 'grey';
+  let worst = 'green';
+  for(const doc of docs){
+    const s = statusFor(doc.expiry_date);
+    if(s === 'red') return 'red';
+    if(s === 'yellow') worst = 'yellow';
+  }
+  return worst;
+}
+
+/* ---------- Indicadores (dashboard) ---------- */
+/* Status de cada documento do colaborador (para contagens que não devem
+   "esconder" um documento a vencer atrás de outro já vencido). */
+function employeeDocStatuses(empId){
+  return state.documents.filter(d => d.employee_id === empId).map(d => statusFor(d.expiry_date));
+}
+
+/* Um colaborador pode contar em mais de uma categoria: se tem um documento
+   vencido e outro a vencer, ele aparece tanto em "Atrasados" quanto em
+   "A vencer". "Em dia" e "Sem documentos" continuam exclusivos. */
+function employeeMatchesFilter(empId, filter){
+  if(!filter) return true;
+  const statuses = employeeDocStatuses(empId);
+  if(filter === 'red') return statuses.includes('red');
+  if(filter === 'yellow') return statuses.includes('yellow');
+  if(filter === 'green') return statuses.length > 0 && statuses.every(s => s === 'green');
+  if(filter === 'grey') return statuses.length === 0;
+  return true;
+}
+
+function computeStats(){
+  const stats = { total: state.employees.length, red: 0, yellow: 0, green: 0, grey: 0 };
+  state.employees.forEach(e => {
+    const statuses = employeeDocStatuses(e.id);
+    if(statuses.length === 0){ stats.grey++; return; }
+    if(statuses.includes('red')) stats.red++;
+    if(statuses.includes('yellow')) stats.yellow++;
+    if(statuses.every(s => s === 'green')) stats.green++;
+  });
+  return stats;
+}
+
+const STAT_FILTER_LABEL = { red: 'Atrasados', yellow: 'A vencer', green: 'Em dia', grey: 'Sem documentos' };
+
+function renderStats(){
+  const stats = computeStats();
+  const cards = [
+    { key: '',       cls: 'total',  dot: 'blue',   label: 'Colaboradores cadastrados', value: stats.total },
+    { key: 'red',    cls: 'red',    dot: 'red',    label: 'Atrasados (documentos vencidos)', value: stats.red },
+    { key: 'yellow', cls: 'yellow', dot: 'yellow', label: `A vencer (próx. ${ALERT_WINDOW_DAYS} dias)`, value: stats.yellow },
+    { key: 'green',  cls: 'green',  dot: 'green',  label: 'Em dia com a documentação', value: stats.green },
+    { key: 'grey',   cls: 'grey',   dot: 'grey',   label: 'Sem documentos cadastrados', value: stats.grey },
+  ];
+  return `
+    <div class="stats-grid">
+      ${cards.map(c => `
+        <button type="button" class="stat-card ${c.cls} ${statusFilter === c.key && c.key !== '' ? 'active' : ''}" data-stat-filter="${c.key}">
+          <div class="stat-label"><span class="dot ${c.dot}"></span>${c.label}</div>
+          <div class="stat-value">${c.value}</div>
+        </button>
+      `).join('')}
+    </div>
+    ${statusFilter ? `<button type="button" class="stats-clear" id="clear-stat-filter">✕ Limpar filtro (${STAT_FILTER_LABEL[statusFilter]})</button>` : ''}
+  `;
+}
+
+/* Lista de alertas (documentos atrasados ou a vencer) — some por padrão,
+   só aparece ao clicar no cartão correspondente do painel de indicadores. */
+function renderAlertsPanel(){
+  const alerts = state.documents
+    .map(doc => ({ ...doc, days: daysUntil(doc.expiry_date), status: statusFor(doc.expiry_date) }))
+    .filter(d => d.status === statusFilter)
+    .sort((a,b) => a.days - b.days);
+
+  const title = statusFilter === 'red' ? 'Documentos atrasados' : `Documentos a vencer (próx. ${ALERT_WINDOW_DAYS} dias)`;
+  const emptyMsg = statusFilter === 'red' ? 'Nenhum documento atrasado no momento.' : 'Nenhum documento perto do vencimento no momento.';
+
+  return `
+    <div class="alerts">
+      <div class="alerts-head">
+        <h2>${title}</h2>
+        <span class="alerts-count ${alerts.length ? '' : 'ok'}">${alerts.length}</span>
+      </div>
+      ${alerts.length === 0
+        ? `<div class="alerts-empty">${emptyMsg}</div>`
+        : alerts.map(a => {
+            const emp = state.employees.find(e => e.id === a.employee_id);
+            const late = a.days < 0;
+            const msg = late ? `venceu há ${Math.abs(a.days)} dia(s)` : `vence em ${a.days} dia(s)`;
+            return `<div class="alert-row ${late ? '' : 'warn'}">
+              <span class="emp">${emp ? escapeHtml(emp.name) : '—'}</span>
+              <span class="msg">${escapeHtml(a.type)} — ${msg} (${fmtDate(a.expiry_date)})</span>
+              <span class="days ${late ? 'late' : ''}">${late ? 'VENCIDO' : `${a.days}d`}</span>
+            </div>`;
+          }).join('')
+      }
+    </div>
+  `;
+}
+
+function fmtDate(dateStr){
+  const [y,m,d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+/* ---------- Carregamento inicial ---------- */
+async function load(){
+  loadSession();
+  if(!session){
+    render();
+    return;
+  }
+  const ok = await ensureFreshSession();
+  if(!ok){
+    clearSession();
+    render();
+    return;
+  }
+  app.innerHTML = `<div class="loading">Carregando painel...</div>`;
+  try{
+    const [empRes, docRes] = await Promise.all([
+      apiFetch(`${REST}/employees?select=*&order=name.asc`, { headers: sbHeaders() }),
+      apiFetch(`${REST}/documents?select=*&order=expiry_date.asc`, { headers: sbHeaders() })
+    ]);
+    if(empRes.status === 401 || docRes.status === 401) return; // apiFetch já tratou a sessão expirada
+    if(!empRes.ok || !docRes.ok) throw new Error('Falha ao carregar dados');
+    state.employees = await empRes.json();
+    state.documents = await docRes.json();
+  }catch(e){
+    console.error('Falha ao carregar', e);
+    app.innerHTML = `<div class="loading">Não foi possível conectar ao banco de dados. Verifique sua conexão e recarregue a página.</div>`;
+    return;
+  }
+  render();
+}
+
+/* ---------- Colaboradores ---------- */
+async function addEmployee(name, role){
+  try{
+    const res = await apiFetch(`${REST}/employees`, {
+      method: 'POST',
+      headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+      body: JSON.stringify({ name: name.trim(), role: role.trim() || null })
+    });
+    if(!res.ok) throw new Error();
+    const [emp] = await res.json();
+    state.employees.push(emp);
+    state.employees.sort((a,b) => a.name.localeCompare(b.name));
+    selectedEmployeeId = emp.id;
+    render();
+    showToast('Colaborador adicionado.');
+  }catch(e){
+    console.error('Falha ao adicionar colaborador', e);
+    showToast('Não foi possível adicionar o colaborador.');
+  }
+}
+
+async function removeEmployee(id){
+  try{
+    const docsToRemove = state.documents.filter(d => d.employee_id === id);
+    await Promise.all(docsToRemove.filter(d => d.file_path).map(d => deleteAttachmentFile(d.file_path)));
+    const res = await apiFetch(`${REST}/employees?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders() });
+    if(!res.ok) throw new Error();
+    state.employees = state.employees.filter(e => e.id !== id);
+    state.documents = state.documents.filter(d => d.employee_id !== id);
+    if(selectedEmployeeId === id) selectedEmployeeId = state.employees[0]?.id || null;
+    selectedEmployeeIdsForZip.delete(id);
+    render();
+    showToast('Colaborador removido.');
+  }catch(e){
+    console.error('Falha ao remover colaborador', e);
+    showToast('Não foi possível remover o colaborador.');
+  }
+}
+
+/* ---------- Documentos ---------- */
+async function addDocument(employeeId, type, issueDate, expiryDate, responsibleName, responsibleEmail){
+  try{
+    const res = await apiFetch(`${REST}/documents`, {
+      method: 'POST',
+      headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+      body: JSON.stringify({
+        employee_id: employeeId, type, issue_date: issueDate, expiry_date: expiryDate,
+        responsible_name: responsibleName || null, responsible_email: responsibleEmail || null
+      })
+    });
+    if(!res.ok) throw new Error();
+    const [doc] = await res.json();
+    state.documents.push(doc);
+    showAddDocForm = false;
+    render();
+    return doc;
+  }catch(e){
+    console.error('Falha ao adicionar documento', e);
+    showToast('Não foi possível adicionar o documento.');
+    return null;
+  }
+}
+
+async function updateDocument(id, type, issueDate, expiryDate, responsibleName, responsibleEmail){
+  try{
+    const res = await apiFetch(`${REST}/documents?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+      body: JSON.stringify({
+        type, issue_date: issueDate, expiry_date: expiryDate,
+        responsible_name: responsibleName || null, responsible_email: responsibleEmail || null,
+        alert_sent_at: null
+      })
+    });
+    if(!res.ok) throw new Error();
+    const [updated] = await res.json();
+    const idx = state.documents.findIndex(d => d.id === id);
+    if(idx > -1) state.documents[idx] = updated;
+    render();
+    showToast('Documento atualizado.');
+  }catch(e){
+    console.error('Falha ao atualizar documento', e);
+    showToast('Não foi possível atualizar o documento.');
+  }
+}
+
+async function removeDocument(id){
+  try{
+    const doc = state.documents.find(d => d.id === id);
+    if(doc?.file_path) await deleteAttachmentFile(doc.file_path);
+    const res = await apiFetch(`${REST}/documents?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders() });
+    if(!res.ok) throw new Error();
+    state.documents = state.documents.filter(d => d.id !== id);
+    selectedAttachmentIds.delete(id);
+    render();
+    showToast('Documento removido.');
+  }catch(e){
+    console.error('Falha ao remover documento', e);
+    showToast('Não foi possível remover o documento.');
+  }
+}
+
+/* ---------- Anexos (Supabase Storage) ---------- */
+/* O bucket "anexos" é privado: todo acesso passa pelo endpoint autenticado abaixo,
+   nunca pela URL pública (/object/public/...), para que só usuários logados baixem arquivos. */
+function attachmentUrl(path){
+  return `${STORAGE}/object/anexos/${path}`;
+}
+
+async function fetchAttachmentBlob(path){
+  const res = await apiFetch(attachmentUrl(path), { headers: sbHeaders() });
+  if(!res.ok) throw new Error('fetch failed');
+  return await res.blob();
+}
+
+function sanitizeFileName(name){
+  return String(name).replace(/[\\/:*?"<>|]/g, '-').trim() || 'arquivo';
+}
+
+async function downloadAttachmentsZip(docsWithFiles, zipFileName, emptyMessage){
+  if(docsWithFiles.length === 0){
+    showToast(emptyMessage);
+    return;
+  }
+  if(typeof JSZip === 'undefined'){
+    showToast('Não foi possível carregar a ferramenta de compactação. Verifique sua conexão.');
+    return;
+  }
+
+  showToast(`Preparando ${docsWithFiles.length} anexo(s)...`);
+  const zip = new JSZip();
+  const usedNames = new Set();
+  let failCount = 0;
+
+  for(const doc of docsWithFiles){
+    try{
+      const blob = await fetchAttachmentBlob(doc.file_path);
+
+      const baseName = sanitizeFileName(`${doc.type} - ${doc.file_name || 'anexo'}`);
+      let finalName = baseName;
+      let counter = 2;
+      while(usedNames.has(finalName.toLowerCase())){
+        const dot = baseName.lastIndexOf('.');
+        finalName = dot > -1 ? `${baseName.slice(0, dot)} (${counter})${baseName.slice(dot)}` : `${baseName} (${counter})`;
+        counter++;
+      }
+      usedNames.add(finalName.toLowerCase());
+      zip.file(finalName, blob);
+    }catch(e){
+      console.error('Falha ao baixar anexo para o zip', doc.id, e);
+      failCount++;
+    }
+  }
+
+  if(usedNames.size === 0){
+    showToast('Não foi possível baixar nenhum anexo. Tente novamente.');
+    return;
+  }
+
+  try{
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const zipUrl = URL.createObjectURL(zipBlob);
+    const link = document.createElement('a');
+    link.href = zipUrl;
+    link.download = zipFileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(zipUrl), 4000);
+    showToast(failCount > 0 ? `Zip baixado — ${failCount} anexo(s) falharam.` : 'Zip baixado com sucesso.');
+  }catch(e){
+    console.error('Falha ao gerar zip', e);
+    showToast('Não foi possível gerar o arquivo zip.');
+  }
+}
+
+async function downloadAllAttachments(employeeId){
+  const emp = state.employees.find(e => e.id === employeeId);
+  if(!emp) return;
+  const docsWithFiles = state.documents.filter(d => d.employee_id === employeeId && d.file_path);
+  await downloadAttachmentsZip(
+    docsWithFiles,
+    `Documentos - ${sanitizeFileName(emp.name)}.zip`,
+    'Este colaborador não tem nenhum anexo.'
+  );
+}
+
+async function downloadSelectedAttachments(employeeId){
+  const emp = state.employees.find(e => e.id === employeeId);
+  if(!emp) return;
+  const docsWithFiles = state.documents.filter(d => d.employee_id === employeeId && d.file_path && selectedAttachmentIds.has(d.id));
+  await downloadAttachmentsZip(
+    docsWithFiles,
+    `Documentos selecionados - ${sanitizeFileName(emp.name)}.zip`,
+    'Nenhum anexo selecionado.'
+  );
+}
+
+async function downloadEmployeesZip(employeeIds){
+  const emps = state.employees.filter(e => employeeIds.has(e.id));
+  if(emps.length === 0){
+    showToast('Nenhum colaborador selecionado.');
+    return;
+  }
+
+  const items = [];
+  emps.forEach(emp => {
+    state.documents
+      .filter(d => d.employee_id === emp.id && d.file_path)
+      .forEach(doc => items.push({ doc, emp }));
+  });
+
+  if(items.length === 0){
+    showToast('Nenhum dos colaboradores selecionados tem anexos.');
+    return;
+  }
+  if(typeof JSZip === 'undefined'){
+    showToast('Não foi possível carregar a ferramenta de compactação. Verifique sua conexão.');
+    return;
+  }
+
+  showToast(`Preparando ${items.length} anexo(s) de ${emps.length} colaborador(es)...`);
+  const zip = new JSZip();
+
+  // pasta única por colaborador, evitando nomes repetidos
+  const folderNames = new Map();
+  const usedFolderLabels = new Set();
+  emps.forEach(emp => {
+    const base = sanitizeFileName(emp.name);
+    let final = base;
+    let counter = 2;
+    while(usedFolderLabels.has(final.toLowerCase())){
+      final = `${base} (${counter})`;
+      counter++;
+    }
+    usedFolderLabels.add(final.toLowerCase());
+    folderNames.set(emp.id, final);
+  });
+
+  const usedNamesPerFolder = new Map();
+  let failCount = 0;
+
+  for(const { doc, emp } of items){
+    try{
+      const blob = await fetchAttachmentBlob(doc.file_path);
+
+      const folderName = folderNames.get(emp.id);
+      if(!usedNamesPerFolder.has(folderName)) usedNamesPerFolder.set(folderName, new Set());
+      const usedNames = usedNamesPerFolder.get(folderName);
+
+      const baseName = sanitizeFileName(`${doc.type} - ${doc.file_name || 'anexo'}`);
+      let finalName = baseName;
+      let counter = 2;
+      while(usedNames.has(finalName.toLowerCase())){
+        const dot = baseName.lastIndexOf('.');
+        finalName = dot > -1 ? `${baseName.slice(0, dot)} (${counter})${baseName.slice(dot)}` : `${baseName} (${counter})`;
+        counter++;
+      }
+      usedNames.add(finalName.toLowerCase());
+      zip.folder(folderName).file(finalName, blob);
+    }catch(e){
+      console.error('Falha ao baixar anexo para o zip', doc.id, e);
+      failCount++;
+    }
+  }
+
+  if([...usedNamesPerFolder.values()].every(s => s.size === 0)){
+    showToast('Não foi possível baixar nenhum anexo. Tente novamente.');
+    return;
+  }
+
+  try{
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    const zipUrl = URL.createObjectURL(zipBlob);
+    const link = document.createElement('a');
+    link.href = zipUrl;
+    link.download = emps.length === 1
+      ? `Documentos - ${sanitizeFileName(emps[0].name)}.zip`
+      : `Documentos - ${emps.length} colaboradores.zip`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(zipUrl), 4000);
+    showToast(failCount > 0 ? `Zip baixado — ${failCount} anexo(s) falharam.` : 'Zip baixado com sucesso.');
+  }catch(e){
+    console.error('Falha ao gerar zip', e);
+    showToast('Não foi possível gerar o arquivo zip.');
+  }
+}
+
+async function deleteAttachmentFile(path){
+  try{ await apiFetch(`${STORAGE}/object/anexos/${path}`, { method: 'DELETE', headers: sbHeaders() }); }
+  catch(e){ /* ignora se já não existir */ }
+}
+
+async function attachFile(docId, file){
+  if(file.size > MAX_FILE_SIZE){
+    showToast('Arquivo muito grande (máx. 8MB).');
+    return;
+  }
+  showToast('Enviando anexo...');
+  try{
+    const path = `${docId}/${encodeURIComponent(file.name)}`;
+    const uploadRes = await apiFetch(`${STORAGE}/object/anexos/${path}`, {
+      method: 'POST',
+      headers: sbHeaders({ 'Content-Type': file.type || 'application/octet-stream', 'x-upsert': 'true' }),
+      body: file
+    });
+    if(!uploadRes.ok) throw new Error('upload');
+    const patchRes = await apiFetch(`${REST}/documents?id=eq.${docId}`, {
+      method: 'PATCH',
+      headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+      body: JSON.stringify({ file_name: file.name, file_path: path })
+    });
+    if(!patchRes.ok) throw new Error('patch');
+    const [updated] = await patchRes.json();
+    const idx = state.documents.findIndex(d => d.id === docId);
+    if(idx > -1) state.documents[idx] = updated;
+    render();
+    showToast('Anexo salvo.');
+  }catch(e){
+    console.error('Falha ao salvar anexo', e);
+    showToast('Não foi possível salvar o anexo.');
+  }
+}
+
+async function viewAttachment(docId){
+  const doc = state.documents.find(d => d.id === docId);
+  if(!doc || !doc.file_path){ showToast('Anexo não encontrado.'); return; }
+  const safeName = escapeHtml(doc.file_name || 'anexo');
+  let previewUrl = null;
+  let revoke = null;
+  try{
+    const blob = await fetchAttachmentBlob(doc.file_path);
+    previewUrl = URL.createObjectURL(blob);
+    revoke = previewUrl;
+  }catch(e){ /* sem acesso ao arquivo — mostra aviso abaixo */ }
+
+  const isImage = /\.(jpe?g|png|webp)$/i.test(doc.file_name || '');
+  const isPdf = /\.pdf$/i.test(doc.file_name || '');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:540px;">
+      <h3>${safeName}</h3>
+      <div style="max-height:60vh; overflow:auto; border:1px solid var(--line); border-radius: var(--radius); margin-bottom:14px; background:var(--surface-2); display:flex; align-items:center; justify-content:center; min-height:140px;">
+        ${!previewUrl ? `<div style="padding:28px; color:var(--ink-soft); font-size:13.5px; text-align:center;">Não foi possível carregar este arquivo.</div>`
+          : isImage ? `<img src="${previewUrl}" style="max-width:100%; display:block;">`
+          : isPdf ? `<embed src="${previewUrl}" type="application/pdf" style="width:100%; height:420px;">`
+          : `<div style="padding:28px; color:var(--ink-soft); font-size:13.5px; text-align:center;">Pré-visualização não disponível para este tipo de arquivo.<br>Use o botão "Baixar" abaixo.</div>`}
+      </div>
+      <div class="modal-actions" style="justify-content:space-between;">
+        <button type="button" class="btn ghost" id="close-viewer">Fechar</button>
+        <div style="display:flex; gap:8px;">
+          ${previewUrl ? `
+          <a href="${previewUrl}" target="_blank" rel="noopener" class="btn ghost small" style="text-decoration:none;">Abrir em nova aba</a>
+          <a href="${previewUrl}" download="${safeName}" class="btn primary small" style="text-decoration:none;">Baixar</a>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  const cleanup = () => { if(revoke) URL.revokeObjectURL(revoke); overlay.remove(); };
+  overlay.querySelector('#close-viewer').addEventListener('click', cleanup);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) cleanup(); });
+}
+
+async function removeAttachment(docId){
+  const doc = state.documents.find(d => d.id === docId);
+  if(!doc || !doc.file_path) return;
+  try{
+    await deleteAttachmentFile(doc.file_path);
+    const res = await apiFetch(`${REST}/documents?id=eq.${docId}`, {
+      method: 'PATCH',
+      headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'return=representation' }),
+      body: JSON.stringify({ file_name: null, file_path: null })
+    });
+    if(!res.ok) throw new Error();
+    const [updated] = await res.json();
+    const idx = state.documents.findIndex(d => d.id === docId);
+    if(idx > -1) state.documents[idx] = updated;
+    selectedAttachmentIds.delete(docId);
+    render();
+    showToast('Anexo removido.');
+  }catch(e){
+    console.error('Falha ao remover anexo', e);
+    showToast('Não foi possível remover o anexo.');
+  }
+}
+
+/* ---------- Render ---------- */
+function render(){
+  if(!session){
+    renderLogin();
+    return;
+  }
+
+  app.innerHTML = `
+    <div class="header">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <img src="${LOGO_DATA_URI}" alt="Logo Kalfer" style="width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0;">
+        <div>
+          <h1>Documentos da Obra</h1>
+          <div class="sub">Painel de acompanhamento de documentos e vencimentos da equipe — sincronizado na nuvem</div>
+        </div>
+      </div>
+      <div class="user-bar">
+        <span class="user-badge">Logado como <span class="who">${escapeHtml(session.email || '')}</span></span>
+        <button class="btn ghost small" id="btn-history">Histórico</button>
+        <button class="btn ghost small" id="btn-logout">Sair</button>
+        <button class="btn primary" id="btn-add-emp">+ Colaborador</button>
+      </div>
+    </div>
+
+    ${renderStats()}
+
+    ${(statusFilter === 'red' || statusFilter === 'yellow') ? renderAlertsPanel() : ''}
+
+    ${state.employees.length === 0 ? renderEmptyState() : renderLayout()}
+  `;
+
+  document.getElementById('btn-add-emp')?.addEventListener('click', openAddEmployeeModal);
+  document.getElementById('btn-add-emp-empty')?.addEventListener('click', openAddEmployeeModal);
+  document.getElementById('btn-history')?.addEventListener('click', openHistory);
+  document.getElementById('btn-logout')?.addEventListener('click', () => {
+    openConfirmModal('Sair da sua conta?', () => logout());
+  });
+  document.querySelectorAll('[data-stat-filter]').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.getAttribute('data-stat-filter') || null;
+      statusFilter = (statusFilter === key) ? null : key;
+      render();
+    });
+  });
+  document.getElementById('clear-stat-filter')?.addEventListener('click', () => {
+    statusFilter = null;
+    render();
+  });
+  attachLayoutEvents();
+
+  if(historyOpen) renderHistoryModal();
+}
+
+/* ---------- Login ---------- */
+function renderLogin(){
+  app.innerHTML = `
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="brand">
+          <img src="${LOGO_DATA_URI}" alt="Logo Kalfer">
+          <div>
+            <h1>Documentos da Obra</h1>
+            <div class="sub">Kalfer — acesso restrito</div>
+          </div>
+        </div>
+        ${loginError ? `<div class="login-error">${escapeHtml(loginError)}</div>` : ''}
+        <form id="login-form">
+          <div class="field">
+            <label>E-mail</label>
+            <input type="email" name="email" required autofocus autocomplete="username">
+          </div>
+          <div class="field">
+            <label>Senha</label>
+            <input type="password" name="password" required autocomplete="current-password">
+          </div>
+          <button type="submit" class="btn primary" ${loginBusy ? 'disabled' : ''}>${loginBusy ? 'Entrando...' : 'Entrar'}</button>
+        </form>
+        <div class="login-note"><a id="forgot-pass">Esqueci minha senha</a></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('login-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    loginWithPassword(f.get('email'), f.get('password'));
+  });
+  document.getElementById('forgot-pass').addEventListener('click', () => {
+    const emailInput = document.querySelector('#login-form input[name="email"]');
+    const email = emailInput && emailInput.value.trim();
+    if(!email){ showToast('Digite seu e-mail no campo acima primeiro.'); return; }
+    requestPasswordReset(email);
+  });
+}
+
+/* ---------- Histórico de alterações ---------- */
+const HISTORY_ACTION_LABEL = { INSERT: 'Criado', UPDATE: 'Alterado', DELETE: 'Removido' };
+const HISTORY_TABLE_LABEL = { employees: 'Colaborador', documents: 'Documento' };
+
+function historyRowSummary(row){
+  const data = row.new_data || row.old_data || {};
+  if(row.table_name === 'employees'){
+    return data.name ? escapeHtml(data.name) : '—';
+  }
+  if(row.table_name === 'documents'){
+    const emp = state.employees.find(e => e.id === data.employee_id);
+    const who = emp ? emp.name : (data.employee_id || '—');
+    return `${escapeHtml(data.type || '—')} <span style="color:var(--ink-soft)">(${escapeHtml(who)})</span>`;
+  }
+  return '—';
+}
+
+function fmtDateTime(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }catch(e){ return iso; }
+}
+
+function renderHistoryModal(){
+  document.getElementById('history-overlay')?.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.id = 'history-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:720px;">
+      <h3>Histórico de alterações</h3>
+      <div style="max-height:60vh; overflow:auto; border:1px solid var(--line); border-radius: var(--radius); margin-bottom:14px;">
+        ${historyLoading ? `<div class="loading">Carregando histórico...</div>`
+          : historyError ? `<div class="loading">${escapeHtml(historyError)}</div>`
+          : historyRows.length === 0 ? `<div class="loading">Nenhuma alteração registrada ainda.</div>`
+          : `<table class="history-table">
+              <thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Tipo</th><th>Registro</th></tr></thead>
+              <tbody>
+                ${historyRows.map(r => `
+                  <tr>
+                    <td class="history-when">${fmtDateTime(r.changed_at)}</td>
+                    <td>${escapeHtml(r.changed_by_email || 'desconhecido')}</td>
+                    <td><span class="history-action ${String(r.action).toLowerCase()}">${HISTORY_ACTION_LABEL[r.action] || r.action}</span></td>
+                    <td>${HISTORY_TABLE_LABEL[r.table_name] || escapeHtml(r.table_name)}</td>
+                    <td>${historyRowSummary(r)}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>`
+        }
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="btn-refresh-history">Atualizar</button>
+        <button type="button" class="btn primary" id="close-history">Fechar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#close-history').addEventListener('click', closeHistory);
+  overlay.querySelector('#btn-refresh-history').addEventListener('click', loadHistory);
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeHistory(); });
+}
+
+function renderEmptyState(){
+  return `
+    <div class="panel">
+      <div class="empty-state">
+        <h3>Nenhum colaborador cadastrado</h3>
+        <p>Adicione os colaboradores da obra para começar a controlar os documentos e prazos de cada um.</p>
+        <button class="btn primary" id="btn-add-emp-empty">+ Adicionar colaborador</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderLayout(){
+  if(!selectedEmployeeId || !state.employees.find(e => e.id === selectedEmployeeId)){
+    selectedEmployeeId = state.employees[0].id;
+  }
+  const emp = state.employees.find(e => e.id === selectedEmployeeId);
+  const empDocs = state.documents.filter(d => d.employee_id === emp.id)
+    .sort((a,b) => new Date(a.expiry_date) - new Date(b.expiry_date));
+  const visibleEmployees = statusFilter ? state.employees.filter(e => employeeMatchesFilter(e.id, statusFilter)) : state.employees;
+
+  return `
+    <div class="layout">
+      <div class="panel">
+        <div class="panel-head" style="justify-content:space-between;">
+          <h2>Equipe ${statusFilter ? `<span style="font-size:12.5px; font-weight:500; color:var(--ink-soft);">(${visibleEmployees.length} de ${state.employees.length})</span>` : ''}</h2>
+          <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--ink-soft); cursor:pointer;">
+            <input type="checkbox" id="select-all-emp" ${visibleEmployees.length > 0 && visibleEmployees.every(e => selectedEmployeeIdsForZip.has(e.id)) ? 'checked' : ''}>
+            Selecionar todos
+          </label>
+        </div>
+        <ul class="emp-list">
+          ${visibleEmployees.length === 0
+            ? `<li class="emp-empty">Nenhum colaborador com esse status.</li>`
+            : visibleEmployees.map(e => `
+            <li class="emp-item ${e.id === emp.id ? 'active' : ''}" data-emp="${e.id}">
+              <input type="checkbox" data-emp-select="${e.id}" ${selectedEmployeeIdsForZip.has(e.id) ? 'checked' : ''} style="cursor:pointer;" title="Selecionar para baixar em lote">
+              <span class="dot ${employeeStatus(e.id)}"></span>
+              <div>
+                <div class="name">${escapeHtml(e.name)}</div>
+                <div class="role">${e.role ? escapeHtml(e.role) : 'Sem função definida'}</div>
+              </div>
+            </li>
+          `).join('')}
+        </ul>
+        <div style="padding:10px 12px; border-top:1px solid var(--line);">
+          <button class="btn ghost small" id="btn-download-employees-zip" style="width:100%; ${selectedEmployeeIdsForZip.size === 0 ? 'opacity:0.5; cursor:not-allowed;' : ''}" ${selectedEmployeeIdsForZip.size === 0 ? 'disabled' : ''}>⬇ Baixar selecionados em pastas (${selectedEmployeeIdsForZip.size})</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <div class="detail-head" style="width:100%">
+            <div class="who">
+              <h2>${escapeHtml(emp.name)}</h2>
+              <div class="role">${emp.role ? escapeHtml(emp.role) : 'Sem função definida'}</div>
+            </div>
+            <div class="detail-actions">
+              <button class="btn ghost small" id="btn-download-selected" ${selectedAttachmentIds.size === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>⬇ Baixar selecionados (${selectedAttachmentIds.size})</button>
+              <button class="btn ghost small" id="btn-download-all">⬇ Baixar anexos (.zip)</button>
+              <button class="btn ghost small" id="btn-toggle-doc">+ Documento</button>
+              <button class="btn danger small" id="btn-del-emp">Remover colaborador</button>
+            </div>
+          </div>
+        </div>
+
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Emissão</th>
+              <th>Vencimento</th>
+              <th>Status</th>
+              <th>Responsável</th>
+              <th>Anexo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${empDocs.length === 0 ? `<tr><td colspan="7" class="doc-empty">Nenhum documento cadastrado para este colaborador.</td></tr>` :
+              empDocs.map(doc => {
+                const s = statusFor(doc.expiry_date);
+                const label = s === 'red' ? 'Vencido' : s === 'yellow' ? 'A vencer' : 'Válido';
+                const attachCell = doc.file_name
+                  ? `<div class="row-actions">
+                       <input type="checkbox" data-select-attach="${doc.id}" ${selectedAttachmentIds.has(doc.id) ? 'checked' : ''} title="Selecionar para baixar" style="cursor:pointer;">
+                       <button class="icon-btn" data-view-doc="${doc.id}" title="Abrir anexo">📎 ${escapeHtml(doc.file_name)}</button>
+                       <button class="icon-btn" data-remove-attach="${doc.id}">Remover</button>
+                     </div>`
+                  : `<label class="btn ghost small" style="cursor:pointer; display:inline-block;">+ Anexar
+                       <input type="file" data-attach-doc="${doc.id}" style="display:none" accept=".pdf,.jpg,.jpeg,.png,.webp" title="PDF, JPG, PNG ou WEBP — máx. 8MB">
+                     </label>`;
+                const respCell = doc.responsible_name
+                  ? `<span title="${escapeHtml(doc.responsible_email || '')}">${escapeHtml(doc.responsible_name)}</span>`
+                  : `<span style="color:var(--ink-soft); font-size:12.5px;">Não definido</span>`;
+                return `<tr>
+                  <td>${escapeHtml(doc.type)}</td>
+                  <td>${fmtDate(doc.issue_date)}</td>
+                  <td>${fmtDate(doc.expiry_date)}</td>
+                  <td><span class="status-pill ${s}">${label}</span></td>
+                  <td>${respCell}</td>
+                  <td>${attachCell}</td>
+                  <td class="row-actions">
+                    <button class="icon-btn" data-edit-doc="${doc.id}">Editar</button>
+                    <button class="icon-btn" data-del-doc="${doc.id}">Remover</button>
+                  </td>
+                </tr>`;
+              }).join('')
+            }
+          </tbody>
+        </table>
+
+        <div class="add-doc" style="${showAddDocForm ? '' : 'display:none'}" id="add-doc-block">
+          <form id="doc-form">
+            ${docTypeDatalist()}
+            <div class="form-grid">
+              <div class="field">
+                <label>Tipo de documento</label>
+                <input type="text" name="type" list="doc-types-list" required placeholder="Digite ou selecione">
+              </div>
+              <div class="field">
+                <label>Emissão</label>
+                <input type="date" name="issueDate" required>
+              </div>
+              <div class="field">
+                <label>Vencimento</label>
+                <input type="date" name="expiryDate" required>
+              </div>
+              <div class="field">
+                <button type="submit" class="btn primary">Salvar</button>
+              </div>
+            </div>
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top:10px;">
+              <div class="field">
+                <label>Responsável pelo preenchimento</label>
+                <input type="text" name="responsibleName" placeholder="Nome de quem cuida deste documento">
+              </div>
+              <div class="field">
+                <label>E-mail do responsável</label>
+                <input type="email" name="responsibleEmail" placeholder="para receber o alerta de vencimento">
+              </div>
+            </div>
+            <div class="field" style="max-width:320px; margin-top:12px;">
+              <label>Anexo (opcional)</label>
+              <input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.webp">
+              <div style="font-size:11.5px; color:var(--ink-soft); margin-top:4px;">PDF, JPG, PNG ou WEBP — máx. 8MB</div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function attachLayoutEvents(){
+  document.querySelectorAll('[data-emp]').forEach(el => {
+    el.addEventListener('click', () => {
+      selectedEmployeeId = el.getAttribute('data-emp');
+      showAddDocForm = false;
+      selectedAttachmentIds = new Set();
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-emp-select]').forEach(el => {
+    el.addEventListener('click', (e) => e.stopPropagation());
+    el.addEventListener('change', (e) => {
+      e.stopPropagation();
+      const id = el.getAttribute('data-emp-select');
+      if(el.checked) selectedEmployeeIdsForZip.add(id);
+      else selectedEmployeeIdsForZip.delete(id);
+      render();
+    });
+  });
+
+  document.getElementById('select-all-emp')?.addEventListener('change', (e) => {
+    const visible = statusFilter ? state.employees.filter(emp => employeeMatchesFilter(emp.id, statusFilter)) : state.employees;
+    if(e.target.checked){
+      visible.forEach(emp => selectedEmployeeIdsForZip.add(emp.id));
+    }else{
+      visible.forEach(emp => selectedEmployeeIdsForZip.delete(emp.id));
+    }
+    render();
+  });
+
+  document.getElementById('btn-download-employees-zip')?.addEventListener('click', () => {
+    downloadEmployeesZip(selectedEmployeeIdsForZip);
+  });
+
+  document.getElementById('btn-toggle-doc')?.addEventListener('click', () => {
+    showAddDocForm = !showAddDocForm;
+    render();
+  });
+
+  document.getElementById('btn-download-all')?.addEventListener('click', () => {
+    downloadAllAttachments(selectedEmployeeId);
+  });
+
+  document.getElementById('btn-download-selected')?.addEventListener('click', () => {
+    downloadSelectedAttachments(selectedEmployeeId);
+  });
+
+  document.querySelectorAll('[data-select-attach]').forEach(el => {
+    el.addEventListener('change', () => {
+      const id = el.getAttribute('data-select-attach');
+      if(el.checked) selectedAttachmentIds.add(id);
+      else selectedAttachmentIds.delete(id);
+      render();
+    });
+  });
+
+  document.getElementById('btn-del-emp')?.addEventListener('click', () => {
+    const emp = state.employees.find(e => e.id === selectedEmployeeId);
+    openConfirmModal(`Remover ${emp.name} e todos os seus documentos?`, () => {
+      removeEmployee(selectedEmployeeId);
+    });
+  });
+
+  document.querySelectorAll('[data-del-doc]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.getAttribute('data-del-doc');
+      openConfirmModal('Remover este documento?', () => removeDocument(id));
+    });
+  });
+
+  document.querySelectorAll('[data-edit-doc]').forEach(el => {
+    el.addEventListener('click', () => {
+      const doc = state.documents.find(d => d.id === el.getAttribute('data-edit-doc'));
+      if(doc) openEditDocModal(doc);
+    });
+  });
+
+  document.querySelectorAll('[data-view-doc]').forEach(el => {
+    el.addEventListener('click', () => viewAttachment(el.getAttribute('data-view-doc')));
+  });
+
+  document.querySelectorAll('[data-remove-attach]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id = el.getAttribute('data-remove-attach');
+      openConfirmModal('Remover o anexo deste documento?', () => removeAttachment(id));
+    });
+  });
+
+  document.querySelectorAll('[data-attach-doc]').forEach(el => {
+    el.addEventListener('change', (e) => {
+      const docId = el.getAttribute('data-attach-doc');
+      const file = e.target.files[0];
+      if(file) attachFile(docId, file);
+    });
+  });
+
+  document.getElementById('doc-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const issueDate = f.get('issueDate');
+    const expiryDate = f.get('expiryDate');
+    if(new Date(expiryDate) < new Date(issueDate)){
+      showToast('A data de vencimento deve ser após a emissão.');
+      return;
+    }
+    const file = f.get('file');
+    const newDoc = await addDocument(selectedEmployeeId, f.get('type'), issueDate, expiryDate, f.get('responsibleName'), f.get('responsibleEmail'));
+    if(newDoc){
+      showToast('Documento adicionado.');
+      if(file && file.size > 0){
+        await attachFile(newDoc.id, file);
+      }
+    }
+  });
+}
+
+/* ---------- Modais ---------- */
+function openAddEmployeeModal(){
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Novo colaborador</h3>
+      <form id="emp-form">
+        <div class="field">
+          <label>Nome completo</label>
+          <input type="text" name="name" required autofocus>
+        </div>
+        <div class="field">
+          <label>Função na obra</label>
+          <input type="text" name="role" placeholder="Ex.: Pedreiro, Eletricista, Encarregado">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" id="cancel-emp">Cancelar</button>
+          <button type="submit" class="btn primary">Adicionar</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#cancel-emp').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.remove(); });
+  overlay.querySelector('#emp-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    if(!f.get('name').trim()) return;
+    addEmployee(f.get('name'), f.get('role') || '');
+    overlay.remove();
+  });
+}
+
+function openEditDocModal(doc){
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Editar documento</h3>
+      <form id="edit-doc-form">
+        ${docTypeDatalist()}
+        <div class="field">
+          <label>Tipo de documento</label>
+          <input type="text" name="type" list="doc-types-list" value="${escapeHtml(doc.type)}" required>
+        </div>
+        <div class="field">
+          <label>Emissão</label>
+          <input type="date" name="issueDate" value="${doc.issue_date}" required>
+        </div>
+        <div class="field">
+          <label>Vencimento</label>
+          <input type="date" name="expiryDate" value="${doc.expiry_date}" required>
+        </div>
+        <div class="field">
+          <label>Responsável pelo preenchimento</label>
+          <input type="text" name="responsibleName" value="${escapeHtml(doc.responsible_name || '')}" placeholder="Nome de quem cuida deste documento">
+        </div>
+        <div class="field">
+          <label>E-mail do responsável</label>
+          <input type="email" name="responsibleEmail" value="${escapeHtml(doc.responsible_email || '')}" placeholder="para receber o alerta de vencimento">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" id="cancel-edit-doc">Cancelar</button>
+          <button type="submit" class="btn primary">Salvar alterações</button>
+        </div>
+      </form>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#cancel-edit-doc').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.remove(); });
+  overlay.querySelector('#edit-doc-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const issueDate = f.get('issueDate');
+    const expiryDate = f.get('expiryDate');
+    if(new Date(expiryDate) < new Date(issueDate)){
+      showToast('A data de vencimento deve ser após a emissão.');
+      return;
+    }
+    updateDocument(doc.id, f.get('type'), issueDate, expiryDate, f.get('responsibleName'), f.get('responsibleEmail'));
+    overlay.remove();
+  });
+}
+
+function openConfirmModal(message, onConfirm){
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal">
+      <h3>Confirmar</h3>
+      <p style="font-size:14px; color:var(--ink-soft); margin: 0 0 8px;">${message}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="cancel-confirm">Cancelar</button>
+        <button type="button" class="btn danger" id="ok-confirm">Confirmar</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#cancel-confirm').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.remove(); });
+  overlay.querySelector('#ok-confirm').addEventListener('click', () => { onConfirm(); overlay.remove(); });
+}
+
+load();
+</script>
+</body>
+</html>
