@@ -115,9 +115,9 @@
 
   /* ---------- Painel de indicadores (dashboard) ---------- */
   .stats-grid{
-    display:grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px;
+    display:grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 18px;
   }
-  @media (max-width: 900px){ .stats-grid{ grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 1100px){ .stats-grid{ grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 560px){ .stats-grid{ grid-template-columns: repeat(2, 1fr); } }
   .stat-card{
     appearance:none; -webkit-appearance:none; width:100%; text-align:left;
@@ -140,6 +140,20 @@
   .stat-card.green{ background: var(--green-bg); border-color: #C7DBC9; }
   .dot.blue{ background: var(--blueprint); }
   .dot.orange{ background: var(--orange); }
+  .dot.purple{ background: #6B4C9A; }
+  .stat-card.datecheck{ background: #EEE8F5; border-color: #D5C9E6; }
+  .chk-badge{
+    font-family:'IBM Plex Sans',sans-serif; font-size:12px; font-weight:600; white-space:nowrap;
+    border-radius:20px; padding:3px 9px; border:1px solid transparent; background:none; cursor:pointer;
+  }
+  .chk-badge.none{ color: var(--ink-soft); font-weight:400; cursor:default; }
+  .chk-badge.todo{ border-color: var(--line); color: var(--blueprint); background:#fff; }
+  .chk-badge.todo:hover{ background: var(--blueprint-soft); }
+  .chk-badge.running{ color: var(--blueprint); font-weight:500; cursor:default; }
+  .chk-badge.ok{ background: var(--green-bg); color: var(--green); }
+  .chk-badge.warn{ background: #EEE8F5; color: #6B4C9A; border-color:#D5C9E6; }
+  .chk-badge.unread{ background: #EFEDE7; color: var(--ink-soft); }
+  .chk-notes{ font-size:13px; line-height:1.55; background: var(--surface-2); border-radius:10px; padding:10px 12px; }
   .stat-card.pending{ background: var(--orange-bg); border-color: #EFC7A6; }
 
   /* ---------- Documentos pendentes ---------- */
@@ -218,6 +232,8 @@
   .detail-head .who .role{ color: var(--ink-soft); font-size: 13.5px; }
   .detail-actions{ display:flex; gap:8px; }
 
+  .layout > .panel{ min-width: 0; }
+  .doc-table-wrap{ overflow-x: auto; }
   .doc-table{ width:100%; border-collapse: collapse; }
   .doc-table th{
     text-align:left; font-size: 12px; font-weight:600; color: var(--ink-soft);
@@ -641,11 +657,12 @@ function employeeMatchesFilter(empId, filter){
   if(filter === 'green') return statuses.length > 0 && statuses.every(s => s === 'green');
   if(filter === 'grey') return statuses.length === 0;
   if(filter === 'pending') return pendingDocsFor(empId).length > 0;
+  if(filter === 'datecheck') return docsWithDateIssues().some(d => d.employee_id === empId);
   return true;
 }
 
 function computeStats(){
-  const stats = { total: state.employees.length, red: 0, yellow: 0, green: 0, grey: 0, pending: 0 };
+  const stats = { total: state.employees.length, red: 0, yellow: 0, green: 0, grey: 0, pending: 0, datecheck: docsWithDateIssues().length };
   state.employees.forEach(e => {
     if(pendingDocsFor(e.id).length > 0) stats.pending++;
     const statuses = employeeDocStatuses(e.id);
@@ -657,7 +674,7 @@ function computeStats(){
   return stats;
 }
 
-const STAT_FILTER_LABEL = { red: 'Atrasados', yellow: 'A vencer', green: 'Em dia', grey: 'Sem documentos', pending: 'Documentos pendentes' };
+const STAT_FILTER_LABEL = { red: 'Atrasados', yellow: 'A vencer', green: 'Em dia', grey: 'Sem documentos', pending: 'Documentos pendentes', datecheck: 'Datas divergentes' };
 
 function renderStats(){
   const stats = computeStats();
@@ -667,6 +684,7 @@ function renderStats(){
     { key: 'yellow', cls: 'yellow', dot: 'yellow', label: `A vencer (próx. ${ALERT_WINDOW_DAYS} dias)`, value: stats.yellow },
     { key: 'green',  cls: 'green',  dot: 'green',  label: 'Em dia com a documentação', value: stats.green },
     { key: 'pending', cls: 'pending', dot: 'orange', label: 'Documentos pendentes (colaboradores)', value: stats.pending },
+    { key: 'datecheck', cls: 'datecheck', dot: 'purple', label: 'Datas divergentes nos anexos', value: stats.datecheck },
   ];
   return `
     <div class="stats-grid">
@@ -816,6 +834,7 @@ async function load(){
     if(!empRes.ok || !docRes.ok) throw new Error('Falha ao carregar dados');
     state.employees = await empRes.json();
     state.documents = await docRes.json();
+    await loadChecks();
   }catch(e){
     console.error('Falha ao carregar', e);
     app.innerHTML = `<div class="loading">Não foi possível conectar ao banco de dados. Verifique sua conexão e recarregue a página.</div>`;
@@ -939,6 +958,7 @@ async function updateDocument(id, type, issueDate, expiryDate, responsibleName, 
     if(idx > -1) state.documents[idx] = updated;
     render();
     showToast('Documento atualizado.');
+    if(updated && updated.file_path) runDateCheck(id);
   }catch(e){
     console.error('Falha ao atualizar documento', e);
     showToast('Não foi possível atualizar o documento.');
@@ -953,6 +973,7 @@ async function removeDocument(id){
     if(!res.ok) throw new Error();
     state.documents = state.documents.filter(d => d.id !== id);
     selectedAttachmentIds.delete(id);
+    deleteCheck(id);
     render();
     showToast('Documento removido.');
   }catch(e){
@@ -1178,7 +1199,8 @@ async function attachFile(docId, file){
     const idx = state.documents.findIndex(d => d.id === docId);
     if(idx > -1) state.documents[idx] = updated;
     render();
-    showToast('Anexo salvo.');
+    showToast('Anexo salvo. Conferindo datas…');
+    runDateCheck(docId);
   }catch(e){
     console.error('Falha ao salvar anexo', e);
     showToast('Não foi possível salvar o anexo.');
@@ -1243,12 +1265,372 @@ async function removeAttachment(docId){
     const idx = state.documents.findIndex(d => d.id === docId);
     if(idx > -1) state.documents[idx] = updated;
     selectedAttachmentIds.delete(docId);
+    deleteCheck(docId);
     render();
     showToast('Anexo removido.');
   }catch(e){
     console.error('Falha ao remover anexo', e);
     showToast('Não foi possível remover o anexo.');
   }
+}
+
+/* ======================================================================
+   Conferência automática de datas dos anexos
+   ----------------------------------------------------------------------
+   Lê o anexo (texto do PDF; se for foto ou PDF escaneado, usa OCR),
+   procura todas as datas escritas nele e compara com a emissão e o
+   vencimento digitados. Resultado salvo na tabela document_checks.
+   ====================================================================== */
+const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+const PDFJS_WORKER_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+const TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+
+/* Validade padrão (meses) usada para conferir o vencimento quando ele não
+   está escrito no documento. Tolerância de 7 dias. */
+const VALIDITY_RULES = [
+  { label: 'ASO',   months: 12, match: t => /\bASO\b/.test(t) },
+  { label: 'NR 10', months: 24, match: nrMatcher('10') },
+  { label: 'NR 35', months: 24, match: nrMatcher('35') },
+  { label: 'NR 33', months: 12, match: nrMatcher('33') },
+];
+const DATE_TOLERANCE_DAYS = 7;
+
+let checksEnabled = true;          // false se a tabela document_checks ainda não existir
+let checksNoticeShown = false;
+const checksById = new Map();       // document_id -> resultado
+const checksRunning = new Set();    // document_id em conferência agora
+let batchCheck = null;              // { done, total } durante conferência em lote
+
+function loadScriptOnce(url){
+  loadScriptOnce.cache = loadScriptOnce.cache || {};
+  if(!loadScriptOnce.cache[url]){
+    loadScriptOnce.cache[url] = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = url; s.onload = resolve; s.onerror = () => { delete loadScriptOnce.cache[url]; reject(new Error('Falha ao carregar ' + url)); };
+      document.head.appendChild(s);
+    });
+  }
+  return loadScriptOnce.cache[url];
+}
+
+async function getPdfjs(){
+  await loadScriptOnce(PDFJS_URL);
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_URL;
+  return window.pdfjsLib;
+}
+
+let ocrWorkerPromise = null;
+async function getOcrWorker(){
+  if(!ocrWorkerPromise){
+    ocrWorkerPromise = (async () => {
+      await loadScriptOnce(TESSERACT_URL);
+      return await Tesseract.createWorker('por');
+    })().catch(e => { ocrWorkerPromise = null; throw e; });
+  }
+  return ocrWorkerPromise;
+}
+
+async function ocrImage(source){
+  const worker = await getOcrWorker();
+  const { data } = await worker.recognize(source);
+  return data.text || '';
+}
+
+/* Extrai o texto do anexo. PDFs com texto são lidos direto; PDFs escaneados
+   e imagens passam por OCR (primeiras páginas). */
+async function extractAttachmentText(blob, fileName){
+  const name = String(fileName || '').toLowerCase();
+  const isPdf = name.endsWith('.pdf') || blob.type === 'application/pdf';
+  const isImage = /\.(jpe?g|png|webp)$/.test(name) || /^image\//.test(blob.type);
+  if(isPdf){
+    const pdfjs = await getPdfjs();
+    const pdf = await pdfjs.getDocument({ data: await blob.arrayBuffer() }).promise;
+    const pages = Math.min(pdf.numPages, 4);
+    let text = '';
+    for(let i = 1; i <= pages; i++){
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(it => it.str).join(' ') + '\n';
+    }
+    if(text.replace(/\s+/g, '').length >= 40) return { text, method: 'texto do PDF' };
+    // PDF escaneado: renderiza e faz OCR das 2 primeiras páginas
+    let ocrText = '';
+    for(let i = 1; i <= Math.min(pdf.numPages, 2); i++){
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width; canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      ocrText += await ocrImage(canvas) + '\n';
+    }
+    return { text: ocrText, method: 'leitura de imagem (OCR)' };
+  }
+  if(isImage){
+    return { text: await ocrImage(blob), method: 'leitura de imagem (OCR)' };
+  }
+  return { text: '', method: 'formato não suportado' };
+}
+
+const PT_MONTHS = { jan:1, janeiro:1, fev:2, fevereiro:2, mar:3, marco:3, abr:4, abril:4, mai:5, maio:5, jun:6, junho:6,
+  jul:7, julho:7, ago:8, agosto:8, set:9, setembro:9, out:10, outubro:10, nov:11, novembro:11, dez:12, dezembro:12 };
+
+function isoDate(y, m, d){
+  y = Number(y); m = Number(m); d = Number(d);
+  if(y < 100) y += 2000;
+  if(y < 1990 || y > 2100 || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  if(dt.getUTCMonth() !== m - 1) return null;
+  return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+/* Encontra todas as datas no texto (dd/mm/aaaa, dd-mm-aa, dd.mm.aaaa,
+   "12 de setembro de 2026", aaaa-mm-dd). */
+function findDatesInText(raw){
+  const text = String(raw || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    .replace(/(?<![a-z])o(?=\d)/g, '0').replace(/(?<=\d)o(?![a-z])/g, '0') // OCR: letra "o" no lugar de zero
+    .replace(/(\d)\s*([\/.\-])\s*(\d)/g, '$1$2$3')        // "12 / 09 / 2026"
+    .replace(/(\d)\s*[º°ª]/g, '$1');                         // "1º de março"
+  const found = new Set();
+  let m;
+  const reNum = /\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4}|\d{2})\b/g;
+  while((m = reNum.exec(text))){ const d = isoDate(m[3], m[2], m[1]); if(d) found.add(d); }
+  const reIso = /\b(\d{4})-(\d{2})-(\d{2})\b/g;
+  while((m = reIso.exec(text))){ const d = isoDate(m[1], m[2], m[3]); if(d) found.add(d); }
+  const reExt = /\b(\d{1,2})\s*(?:de\s+)?(janeiro|fevereiro|marco|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro|jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\.?\s*(?:de\s+)?(\d{4})\b/g;
+  while((m = reExt.exec(text))){ const d = isoDate(m[3], PT_MONTHS[m[2]], m[1]); if(d) found.add(d); }
+  return [...found].sort();
+}
+
+function addMonthsIso(iso, months){
+  const [y, m, d] = iso.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, m - 1 + months, d));
+  return dt.toISOString().slice(0, 10);
+}
+function diffDaysIso(a, b){ return Math.round((Date.parse(a) - Date.parse(b)) / 86400000); }
+
+function validityRuleFor(type){
+  const t = normDocType(type);
+  return VALIDITY_RULES.find(r => r.match(t)) || null;
+}
+
+/* Compara as datas encontradas no anexo com as digitadas. */
+function evaluateDates(doc, found, method){
+  const notes = [];
+  const base = { issue: doc.issue_date, expiry: doc.expiry_date, file_path: doc.file_path, found: found.slice(0, 30), method };
+  if(method === 'formato não suportado'){
+    return { ...base, status: 'unread', notes: ['Formato de arquivo não suportado para leitura automática (use PDF, JPG, PNG ou WEBP).'] };
+  }
+  if(found.length === 0){
+    return { ...base, status: 'unread', notes: ['Não foi possível ler nenhuma data no anexo (imagem pouco nítida ou documento sem datas). Confira manualmente.'] };
+  }
+  let problem = false;
+  const issueFound = found.includes(doc.issue_date);
+  const expiryFound = found.includes(doc.expiry_date);
+  if(issueFound) notes.push(`✓ Emissão ${fmtDate(doc.issue_date)} encontrada no anexo.`);
+  else { problem = true; notes.push(`✗ Emissão ${fmtDate(doc.issue_date)} NÃO aparece no anexo.`); }
+
+  if(expiryFound){
+    notes.push(`✓ Vencimento ${fmtDate(doc.expiry_date)} encontrado no anexo.`);
+  }else{
+    const rule = validityRuleFor(doc.type);
+    if(rule){
+      const expected = addMonthsIso(doc.issue_date, rule.months);
+      const diff = diffDaysIso(doc.expiry_date, expected);
+      if(Math.abs(diff) <= DATE_TOLERANCE_DAYS){
+        notes.push(`✓ Vencimento compatível com a validade padrão de ${rule.label} (${rule.months} meses após a emissão).`);
+      }else{
+        problem = true;
+        notes.push(`✗ Vencimento ${fmtDate(doc.expiry_date)} não bate com a validade padrão de ${rule.label} (${rule.months} meses): o esperado seria ${fmtDate(expected)}.`);
+      }
+    }else{
+      notes.push(`• O vencimento não está escrito no anexo e não há validade padrão cadastrada para este tipo — confira manualmente se necessário.`);
+    }
+  }
+  return { ...base, status: problem ? 'warn' : 'ok', notes };
+}
+
+function checkFor(doc){
+  const c = checksById.get(doc.id);
+  if(!c) return null;
+  // resultado antigo: datas ou anexo mudaram desde a conferência
+  if(c.issue !== doc.issue_date || c.expiry !== doc.expiry_date || c.file_path !== doc.file_path) return null;
+  return c;
+}
+
+async function loadChecks(){
+  try{
+    const res = await apiFetch(`${REST}/document_checks?select=*`, { headers: sbHeaders() });
+    if(!res.ok){ checksEnabled = false; return; }
+    const rows = await res.json();
+    checksById.clear();
+    rows.forEach(r => { if(r.result) checksById.set(String(r.document_id), r.result); });
+    checksEnabled = true;
+  }catch(e){ checksEnabled = false; }
+}
+
+async function saveCheck(docId, result){
+  checksById.set(docId, result);
+  if(!checksEnabled){
+    if(!checksNoticeShown){
+      checksNoticeShown = true;
+      showToast('Conferência feita, mas não será salva: execute o SQL de ativação da conferência no Supabase.', 6000);
+    }
+    return;
+  }
+  try{
+    const res = await apiFetch(`${REST}/document_checks`, {
+      method: 'POST',
+      headers: sbHeaders({ 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates,return=minimal' }),
+      body: JSON.stringify({ document_id: String(docId), result, checked_at: new Date().toISOString() })
+    });
+    if(!res.ok && res.status !== 401){ checksEnabled = false; saveCheck(docId, result); }
+  }catch(e){ /* mantém só em memória */ }
+}
+
+async function deleteCheck(docId){
+  checksById.delete(docId);
+  if(!checksEnabled) return;
+  try{ await apiFetch(`${REST}/document_checks?document_id=eq.${encodeURIComponent(docId)}`, { method: 'DELETE', headers: sbHeaders() }); }catch(e){}
+}
+
+/* Confere um documento. silent = sem toasts (usado no lote). */
+async function runDateCheck(docId, silent){
+  const doc = state.documents.find(d => d.id === docId);
+  if(!doc || !doc.file_path || checksRunning.has(docId)) return null;
+  checksRunning.add(docId);
+  if(!silent) render();
+  let result;
+  try{
+    const blob = await fetchAttachmentBlob(doc.file_path);
+    const { text, method } = await extractAttachmentText(blob, doc.file_name);
+    result = evaluateDates(doc, findDatesInText(text), method);
+  }catch(e){
+    console.error('Falha na conferência de datas', docId, e);
+    result = { status: 'unread', issue: doc.issue_date, expiry: doc.expiry_date, file_path: doc.file_path, found: [], method: 'erro',
+      notes: ['Não foi possível ler o anexo agora (falha de conexão ou arquivo danificado). Tente novamente.'] };
+  }
+  result.checked_at = new Date().toISOString();
+  checksRunning.delete(docId);
+  await saveCheck(docId, result);
+  if(!silent){
+    render();
+    showToast(result.status === 'ok' ? 'Datas conferem com o anexo.' : result.status === 'warn' ? 'Atenção: datas não conferem com o anexo.' : 'Não foi possível ler as datas do anexo.');
+  }
+  return result;
+}
+
+/* Confere em lote todos os anexos ainda não conferidos (ou de uma lista de colaboradores). */
+async function runBatchCheck(employeeIds){
+  if(batchCheck){ showToast('Já existe uma conferência em andamento.'); return; }
+  const docs = state.documents.filter(d => d.file_path && !checkFor(d) && (!employeeIds || employeeIds.includes(d.employee_id)));
+  if(docs.length === 0){ showToast('Todos os anexos já foram conferidos.'); return; }
+  batchCheck = { done: 0, total: docs.length };
+  render();
+  let warn = 0;
+  for(const doc of docs){
+    const r = await runDateCheck(doc.id, true);
+    if(r && r.status === 'warn') warn++;
+    batchCheck.done++;
+    updateBatchProgress();
+  }
+  batchCheck = null;
+  render();
+  showToast(`Conferência concluída: ${docs.length} anexo(s), ${warn} com datas divergentes.`, 5000);
+}
+
+function updateBatchProgress(){
+  const el = document.getElementById('batch-progress');
+  if(el && batchCheck) el.textContent = `Conferindo anexos… ${batchCheck.done}/${batchCheck.total}`;
+}
+
+/* Etiqueta na coluna "Conferência" da tabela de documentos. */
+function renderCheckCell(doc){
+  if(!doc.file_path) return `<span class="chk-badge none" title="Anexe o documento para conferir as datas">Sem anexo</span>`;
+  if(checksRunning.has(doc.id)) return `<span class="chk-badge running">Conferindo…</span>`;
+  const c = checkFor(doc);
+  if(!c) return `<button type="button" class="chk-badge todo" data-run-check="${doc.id}" title="Ler o anexo e comparar as datas">Conferir datas</button>`;
+  const map = { ok: ['ok', c.manual ? '✓ Conferido manualmente' : '✓ Datas conferem'], warn: ['warn', '⚠ Datas divergentes'], unread: ['unread', '? Não lido'] };
+  const [cls, label] = map[c.status] || map.unread;
+  return `<button type="button" class="chk-badge ${cls}" data-show-check="${doc.id}" title="Ver detalhes da conferência">${label}</button>`;
+}
+
+function openCheckModal(docId){
+  const doc = state.documents.find(d => d.id === docId);
+  const c = doc && checkFor(doc);
+  if(!doc || !c) return;
+  const emp = state.employees.find(e => e.id === doc.employee_id);
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:520px;">
+      <h3>Conferência de datas — ${escapeHtml(doc.type)}</h3>
+      <div style="font-size:13px; color:var(--ink-soft); margin-bottom:10px;">${escapeHtml(emp?.name || '')} · anexo: ${escapeHtml(doc.file_name || '')}</div>
+      <table class="history-table" style="margin-bottom:12px;">
+        <tr><td style="width:45%">Emissão digitada</td><td><b>${fmtDate(doc.issue_date)}</b></td></tr>
+        <tr><td>Vencimento digitado</td><td><b>${fmtDate(doc.expiry_date)}</b></td></tr>
+        <tr><td>Datas encontradas no anexo</td><td>${c.found.length ? c.found.map(fmtDate).join(', ') : '<span style="color:var(--ink-soft)">nenhuma</span>'}</td></tr>
+        <tr><td>Como foi lido</td><td>${escapeHtml(c.method || '—')}</td></tr>
+      </table>
+      <div class="chk-notes">${c.notes.map(n => `<div>${escapeHtml(n)}</div>`).join('')}</div>
+      ${c.manual ? `<div style="font-size:12.5px; color:var(--green); margin-top:8px;">Marcado como conferido manualmente${c.manual_by ? ` por ${escapeHtml(c.manual_by)}` : ''}.</div>` : ''}
+      <div style="font-size:11.5px; color:var(--ink-soft); margin-top:10px;">A leitura automática confere se as datas digitadas aparecem no documento. Fotos tortas ou pouco nítidas podem não ser lidas corretamente.</div>
+      <div class="modal-actions" style="flex-wrap:wrap;">
+        <button type="button" class="btn ghost small" id="chk-open">Abrir anexo</button>
+        <button type="button" class="btn ghost small" id="chk-rerun">Conferir novamente</button>
+        ${c.status !== 'ok' ? `<button type="button" class="btn ghost small" id="chk-manual">Conferi — está correto</button>` : ''}
+        <button type="button" class="btn primary small" id="chk-close">Fechar</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.addEventListener('click', e => { if(e.target === overlay) close(); });
+  overlay.querySelector('#chk-close').addEventListener('click', close);
+  overlay.querySelector('#chk-open').addEventListener('click', () => { close(); viewAttachment(docId); });
+  overlay.querySelector('#chk-rerun').addEventListener('click', () => { close(); runDateCheck(docId); });
+  overlay.querySelector('#chk-manual')?.addEventListener('click', async () => {
+    close();
+    await saveCheck(docId, { ...c, status: 'ok', manual: true, manual_by: session?.email || '', checked_at: new Date().toISOString() });
+    render();
+    showToast('Marcado como conferido.');
+  });
+}
+
+/* Documentos com datas divergentes (para o cartão do painel). */
+function docsWithDateIssues(){
+  return state.documents.filter(d => { const c = checkFor(d); return c && c.status === 'warn'; });
+}
+
+function renderDateIssuesPanel(){
+  const docs = docsWithDateIssues().sort((a,b) => {
+    const ea = state.employees.find(e => e.id === a.employee_id)?.name || '';
+    const eb = state.employees.find(e => e.id === b.employee_id)?.name || '';
+    return ea.localeCompare(eb);
+  });
+  const unchecked = state.documents.filter(d => d.file_path && !checkFor(d)).length;
+  return `
+    <div class="alerts">
+      <div class="alerts-head">
+        <h2>Datas divergentes dos anexos</h2>
+        <span class="alerts-count ${docs.length ? 'pend' : 'ok'}">${docs.length}</span>
+        <span style="font-size:12.5px; color:var(--ink-soft);">${unchecked} anexo(s) ainda não conferido(s)</span>
+        ${batchCheck
+          ? `<span id="batch-progress" style="font-size:12.5px; font-weight:600; color:var(--blueprint);">Conferindo anexos… ${batchCheck.done}/${batchCheck.total}</span>`
+          : unchecked ? `<button type="button" class="btn ghost small" id="btn-check-all">Conferir todos os anexos (${unchecked})</button>` : ''}
+      </div>
+      ${docs.length === 0
+        ? `<div class="alerts-empty">Nenhuma divergência encontrada nos anexos conferidos.</div>`
+        : docs.map(d => {
+            const emp = state.employees.find(e => e.id === d.employee_id);
+            const c = checkFor(d);
+            const note = c.notes.find(n => n.startsWith('✗')) || '';
+            return `<div class="alert-row clickable pend" data-alert-emp="${d.employee_id}" data-alert-doc="${d.id}" title="Abrir documento do colaborador">
+              <span class="emp">${emp ? escapeHtml(emp.name) : '—'}</span>
+              <span class="msg">${escapeHtml(d.type)} — ${escapeHtml(note.replace(/^✗\s*/, ''))}</span>
+              <span class="days" style="color:var(--orange);">VERIFICAR</span>
+            </div>`;
+          }).join('')}
+    </div>`;
 }
 
 /* ---------- Render ---------- */
@@ -1279,6 +1661,7 @@ function render(){
 
     ${(statusFilter === 'red' || statusFilter === 'yellow') ? renderAlertsPanel() : ''}
     ${statusFilter === 'pending' ? renderPendingPanel() : ''}
+    ${statusFilter === 'datecheck' ? renderDateIssuesPanel() : ''}
 
     ${state.employees.length === 0 ? renderEmptyState() : renderLayout()}
   `;
@@ -1300,6 +1683,10 @@ function render(){
     statusFilter = null;
     render();
   });
+  document.getElementById('btn-check-all')?.addEventListener('click', () => runBatchCheck(null));
+  document.getElementById('btn-check-emp')?.addEventListener('click', () => runBatchCheck([selectedEmployeeId]));
+  document.querySelectorAll('[data-run-check]').forEach(el => el.addEventListener('click', () => runDateCheck(el.getAttribute('data-run-check'))));
+  document.querySelectorAll('[data-show-check]').forEach(el => el.addEventListener('click', () => openCheckModal(el.getAttribute('data-show-check'))));
   document.querySelectorAll('[data-alert-emp]').forEach(el => {
     el.addEventListener('click', () => {
       selectedEmployeeId = el.getAttribute('data-alert-emp');
@@ -1507,6 +1894,7 @@ function renderLayout(){
             <div class="detail-actions">
               <button class="btn ghost small" id="btn-download-selected" ${selectedAttachmentIds.size === 0 ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>⬇ Baixar selecionados (${selectedAttachmentIds.size})</button>
               <button class="btn ghost small" id="btn-download-all">⬇ Baixar anexos (.zip)</button>
+              <button class="btn ghost small" id="btn-check-emp" ${batchCheck ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : ''}>🔍 Conferir datas</button>
               <button class="btn ghost small" id="btn-toggle-doc">+ Documento</button>
               <button class="btn danger small" id="btn-del-emp">Remover colaborador</button>
             </div>
@@ -1515,20 +1903,21 @@ function renderLayout(){
 
         ${renderEmployeePending(emp.id)}
 
-        <table class="doc-table">
+        <div class="doc-table-wrap"><table class="doc-table">
           <thead>
             <tr>
               <th>Documento</th>
               <th>Emissão</th>
               <th>Vencimento</th>
               <th>Status</th>
+              <th>Conferência</th>
               <th>Responsável</th>
               <th>Anexo</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            ${empDocs.length === 0 ? `<tr><td colspan="7" class="doc-empty">Nenhum documento cadastrado para este colaborador.</td></tr>` :
+            ${empDocs.length === 0 ? `<tr><td colspan="8" class="doc-empty">Nenhum documento cadastrado para este colaborador.</td></tr>` :
               empDocs.map(doc => {
                 const s = statusFor(doc.expiry_date);
                 const label = s === 'red' ? 'Vencido' : s === 'yellow' ? 'A vencer' : 'Válido';
@@ -1549,6 +1938,7 @@ function renderLayout(){
                   <td>${fmtDate(doc.issue_date)}</td>
                   <td>${fmtDate(doc.expiry_date)}</td>
                   <td><span class="status-pill ${s}">${label}</span></td>
+                  <td>${renderCheckCell(doc)}</td>
                   <td>${respCell}</td>
                   <td>${attachCell}</td>
                   <td><div class="row-actions">
@@ -1559,7 +1949,7 @@ function renderLayout(){
               }).join('')
             }
           </tbody>
-        </table>
+        </table></div>
 
         <div class="add-doc" style="${showAddDocForm ? '' : 'display:none'}" id="add-doc-block">
           <form id="doc-form">
