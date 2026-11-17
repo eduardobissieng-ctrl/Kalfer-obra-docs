@@ -288,22 +288,14 @@ function setPath(path, val){
 }
 function muncksSalvos(){ try{ return JSON.parse(localStorage.getItem(LS_MUNCKS) || '[]'); }catch(e){ return []; } }
 /* ---------- Muncks cadastrados no sistema (dados do fabricante) ----------
-   TKA 12.700 Premium: gráfico de carga da ficha técnica da TKA Guindastes. Cada configuração de lanças
-   (H = hidráulicas, M = manuais) tem a sua tabela. Caminhão: dados do CRLV (PBT usado como peso do conjunto). */
-const TKA12700_RAIOS = ['2,0','4,0','5,8','7,7','9,6','11,5','13,6','15,7'];
-const tka12700 = (cfg, desc, caps) => ({
-  marca:'TKA', modelo:`12.700 Premium canivete — ${cfg} (${desc})`, caminhao:'Mercedes-Benz L1622, ano 2001', placa:'MBL1E64',
-  serie:'', ano:'', momento:'12,7', pesoConjunto:'16000', abertura:'5,4', alturaPivo:'3,3', lancaMax:TKA12700_RAIOS[caps.length - 1],
-  pesoGancho:'', reacaoFab:'', inspecaoValidade:'', laudoNum:'',
-  tabelaFonte:`Ficha técnica TKA 12.700 Premium, configuração ${cfg} — conferir com o gráfico de carga fixado no equipamento`,
-  tabela: caps.map((c, i) => ({ raio:TKA12700_RAIOS[i], cap:String(c) })) });
+   TKA 12.700 Premium, configuração 3H0M (3 lanças hidráulicas, sem lança manual): gráfico de carga da ficha
+   técnica da TKA Guindastes. Caminhão: dados do CRLV (PBT usado como peso do conjunto). */
 const MUNCKS_CADASTRADOS = [
-  tka12700('3H0M', '3 hidráulicas, sem manual', [6435, 3200, 2180, 1635, 1300]),
-  tka12700('3H1M', '3 hidráulicas + 1 manual', [6390, 3180, 2160, 1610, 1285, 1020]),
-  tka12700('3H2M', '3 hidráulicas + 2 manuais', [6350, 3175, 2145, 1600, 1275, 980, 825]),
-  tka12700('3H3M', '3 hidráulicas + 3 manuais', [6350, 3170, 2140, 1595, 1270, 975, 800, 600]),
-  tka12700('4H1M', '4 hidráulicas + 1 manual', [6290, 3165, 2135, 1590, 1265, 970, 775]),
-  tka12700('4H2M', '4 hidráulicas + 2 manuais', [6250, 3125, 2095, 1550, 1225, 930, 775, 580])
+  { marca:'TKA', modelo:'12.700 Premium canivete — 3H0M (3 lanças hidráulicas)', caminhao:'Mercedes-Benz L1622, ano 2001', placa:'MBL1E64',
+    serie:'', ano:'', momento:'12,7', pesoConjunto:'16000', abertura:'5,4', alturaPivo:'3,3', lancaMax:'9,6',
+    pesoGancho:'', reacaoFab:'', inspecaoValidade:'', laudoNum:'',
+    tabelaFonte:'Ficha técnica TKA 12.700 Premium, configuração 3H0M — conferir com o gráfico de carga fixado no equipamento',
+    tabela:[['2,0','6435'], ['4,0','3200'], ['5,8','2180'], ['7,7','1635'], ['9,6','1300']].map(([raio, cap]) => ({ raio, cap })) }
 ];
 const nomeMunck = m => [m.marca, m.modelo, m.placa].map(x => String(x||'').trim()).filter(Boolean).join(' · ');
 
