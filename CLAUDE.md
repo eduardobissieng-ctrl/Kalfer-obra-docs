@@ -56,6 +56,8 @@ Página separada, sem login e sem banco de dados, publicada em https://eduardobi
   - Lingas: força por perna = peso × Fc × FAD (padrão 1,15) ÷ (pernas efetivas × cos β); 3 e 4 pernas contam como 3; ângulo com a vertical até 45° ok, 45–60° ressalva, acima de 60° reprova; fator de amarração direto 1,0 / enforcado 0,8 / cesto 2,0.
   - Patola: usa a reação do fabricante se informada; senão estimativa conservadora `CB × FAD × (R ÷ B + 0,5) + peso do conjunto ÷ 2`. Pressão = reação ÷ área do calço, comparada com a tensão admissível do solo.
   - Vento, alcance de lança e distância de rede elétrica são verificações auxiliares.
+- Muncks cadastrados no sistema (constante `MUNCKS_CADASTRADOS`, aparecem na lista "Escolher munck" para toda a equipe): só entram com tabela de carga tirada de documento do fabricante, e o campo `tabelaFonte` registra de onde veio.
+  - **TKA 12.700 Premium (canivete)** no caminhão Mercedes-Benz L1622, placa MBL1E64 (munck de terceiro): seis configurações de lança (3H0M, 3H1M, 3H2M, 3H3M, 4H1M, 4H2M; H = hidráulicas, M = manuais), copiadas do gráfico de carga da ficha técnica da TKA Guindastes. Peso do conjunto = PBT do CRLV (16.000 kg); abertura das patolas 5,4 m; altura do pivô 3,3 m (deduzida do gráfico). Falta o Eduardo confirmar qual configuração é a do equipamento e conferir com o gráfico fixado no munck.
 - Situações: APROVADO, APROVADO COM RESSALVAS, REPROVADO, DADOS INCOMPLETOS. Os documentos sempre trazem o aviso de que só valem após conferência e assinatura de profissional habilitado, com ART. Não remova esse aviso.
 - Ao publicar mudança nessa página, aumente `RIG_VERSION` e teste com Playwright (botão "Preencher com exemplo", abrir as quatro abas de documento, gerar PDF).
 
