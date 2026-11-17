@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plano de Rigging Kalfer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EBE7DD; --surface:#FFFFFF; --surface-2:#F5F2EA; --ink:#21262B; --ink-soft:#5B6268; --line:#D8D2C4;
+    --blueprint:#2E4A66; --blueprint-soft:#E4EAF0; --yellow:#C98A00; --yellow-bg:#FBF0D9; --red:#B23A18; --red-bg:#F7E3DA;
+    --green:#3F6B4C; --green-bg:#E3EDE5; --orange:#C25E12; --orange-bg:#FBE7D6; --radius:3px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ background:var(--bg); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; min-height:100vh; }
+  .app{ max-width:1180px; margin:0 auto; padding:28px 20px 60px; }
+  .header{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:2px solid var(--ink); padding-bottom:14px; margin-bottom:16px; }
+  .header h1{ font-family:'Barlow Condensed',sans-serif; font-weight:700; font-size:38px; letter-spacing:.3px; margin:0; line-height:1; }
+  .header .sub{ color:var(--ink-soft); font-size:14px; margin-top:6px; }
+  .header img{ width:52px; height:52px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+  .btn{ font-family:'IBM Plex Sans',sans-serif; font-weight:600; font-size:14px; border:1.5px solid var(--ink); background:var(--surface); color:var(--ink); padding:9px 16px; border-radius:var(--radius); cursor:pointer; white-space:nowrap; text-decoration:none; display:inline-block; }
+  .btn:hover{ background:var(--ink); color:var(--surface); }
+  .btn.primary{ background:var(--blueprint); border-color:var(--blueprint); color:#fff; }
+  .btn.primary:hover{ background:#223a52; }
+  .btn.ghost{ border-color:var(--line); font-weight:500; }
+  .btn.danger{ border-color:var(--red); color:var(--red); background:none; }
+  .btn.danger:hover{ background:var(--red); color:#fff; }
+  .btn.small{ padding:5px 10px; font-size:12.5px; }
+
+  .toolbar{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
+  .tabs{ display:flex; gap:4px; flex-wrap:wrap; }
+  .tab{ font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:600; padding:8px 14px; border:1.5px solid var(--line); border-bottom:none; background:var(--surface-2); color:var(--ink-soft); cursor:pointer; border-radius:var(--radius) var(--radius) 0 0; }
+  .tab.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .tabs-wrap{ display:flex; justify-content:space-between; align-items:flex-end; gap:10px; flex-wrap:wrap; border-bottom:2px solid var(--ink); margin-bottom:16px; }
+  .tabs-actions{ display:flex; gap:6px; padding-bottom:6px; flex-wrap:wrap; }
+
+  .aviso{ background:var(--yellow-bg); border-left:4px solid var(--yellow); padding:10px 14px; font-size:13.5px; border-radius:var(--radius); margin-bottom:14px; line-height:1.45; }
+  .panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px 18px 18px; margin-bottom:14px; }
+  .panel-head{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .panel-head h2, .panel-head h3{ font-family:'Barlow Condensed',sans-serif; font-size:21px; font-weight:600; margin:0; }
+  .panel-head .sp{ flex:1; }
+  .sub-h{ font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:600; color:var(--blueprint); border-bottom:1px solid var(--line); margin:16px 0 10px; padding-bottom:3px; text-transform:uppercase; letter-spacing:.4px; }
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:10px 14px; }
+  .fld{ display:flex; flex-direction:column; gap:3px; font-size:12.5px; color:var(--ink-soft); font-weight:500; }
+  .fld.w2{ grid-column:span 2; }
+  .fld em{ font-style:normal; font-weight:400; }
+  .fld input, .fld select{ font-family:'IBM Plex Sans',sans-serif; font-size:14px; padding:7px 9px; border:1.5px solid var(--line); border-radius:var(--radius); background:#fff; color:var(--ink); width:100%; }
+  .fld input:focus, .fld select:focus{ outline:none; border-color:var(--blueprint); }
+  .fld small{ font-weight:400; font-size:11.5px; line-height:1.3; }
+  .hint{ font-size:12.5px; color:var(--ink-soft); margin:6px 0 0; line-height:1.4; }
+  .chip{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:500; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+  .chip.ok{ background:var(--green-bg); color:var(--green); }
+  .chip.warn{ background:var(--yellow-bg); color:#8a5f00; }
+  .chip.fail{ background:var(--red-bg); color:var(--red); }
+  .chip.pend{ background:var(--blueprint-soft); color:var(--blueprint); }
+  .res{ margin-top:14px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--radius); padding:10px 12px; }
+  .res-nums{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:8px; }
+  .res-nums div{ font-size:12px; color:var(--ink-soft); }
+  .res-nums b{ display:block; font-family:'Barlow Condensed',sans-serif; font-size:22px; color:var(--ink); line-height:1.1; }
+  .ck{ display:flex; gap:8px; font-size:13px; padding:3px 0; line-height:1.35; }
+  .ck i{ flex:0 0 10px; height:10px; border-radius:50%; margin-top:4px; }
+  .ck.ok i{ background:var(--green); } .ck.warn i{ background:var(--yellow); } .ck.fail i{ background:var(--red); } .ck.pend i{ background:#9aa7b4; }
+  .ck b{ font-weight:600; }
+  table.tc{ border-collapse:collapse; }
+  table.tc th{ font-size:12px; text-align:left; color:var(--ink-soft); padding:0 8px 4px 0; font-weight:500; }
+  table.tc td{ padding:0 8px 6px 0; }
+  table.tc input{ font-family:'IBM Plex Mono',monospace; font-size:13.5px; padding:6px 8px; border:1.5px solid var(--line); border-radius:var(--radius); width:120px; }
+  .xbtn{ border:none; background:none; color:var(--red); cursor:pointer; font-size:16px; padding:2px 6px; }
+  .summary{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--blueprint); padding:10px 14px; border-radius:var(--radius); margin-bottom:14px; font-size:14px; }
+  .foot{ color:var(--ink-soft); font-size:12px; margin-top:26px; text-align:center; }
+
+  /* ---------- Documentos ---------- */
+  .doc{ background:#fff; color:#111; max-width:210mm; margin:0 auto 20px; padding:13mm 14mm; box-shadow:0 1px 6px rgba(0,0,0,.18); font-size:11.5px; line-height:1.45; overflow-x:auto; }
+  .doc h2{ font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:700; background:#21262B; color:#fff; padding:3px 8px; margin:14px 0 7px; letter-spacing:.3px; break-after:avoid; }
+  .doc h3{ font-family:'Barlow Condensed',sans-serif; font-size:15px; font-weight:700; color:#2E4A66; border-bottom:1.5px solid #2E4A66; margin:12px 0 6px; padding-bottom:1px; break-after:avoid; }
+  .doc p{ margin:0 0 6px; }
+  .doc ol, .doc ul{ margin:0 0 6px; padding-left:20px; }
+  .doc li{ margin-bottom:2px; }
+  .doc table{ border-collapse:collapse; width:100%; margin-bottom:8px; }
+  .doc table.t th, .doc table.t td{ border:1px solid #777; padding:3px 6px; vertical-align:top; text-align:left; }
+  .doc table.t th{ background:#ECE9E1; font-weight:600; }
+  .doc table.t tr{ break-inside:avoid; }
+  .doc table.t td.n, .doc table.t th.n{ text-align:right; white-space:nowrap; }
+  .doc table.t td.c, .doc table.t th.c{ text-align:center; }
+  .doc table.dh td{ border:1.5px solid #111; padding:6px 8px; vertical-align:middle; }
+  .doc table.dh img{ width:56px; height:56px; object-fit:cover; display:block; }
+  .doc .dh-tit .t1{ font-family:'Barlow Condensed',sans-serif; font-size:21px; font-weight:700; line-height:1.05; text-transform:uppercase; }
+  .doc .dh-tit .t2{ font-size:11.5px; color:#333; margin-top:2px; }
+  .doc .dh-meta{ font-size:11px; white-space:nowrap; width:1%; }
+  .doc .calc{ border-left:3px solid #2E4A66; background:#F4F6F8; padding:5px 9px; margin-bottom:6px; break-inside:avoid; }
+  .doc .st{ font-weight:700; white-space:nowrap; }
+  .doc .st.ok{ color:#2c6a3f; } .doc .st.warn{ color:#8a5f00; } .doc .st.fail{ color:#B23A18; } .doc .st.pend{ color:#2E4A66; }
+  .doc .verdict{ border:2px solid #111; padding:8px 12px; margin:8px 0; font-size:13px; break-inside:avoid; }
+  .doc .verdict.ok{ border-color:#2c6a3f; background:#EEF5F0; } .doc .verdict.warn{ border-color:#C98A00; background:#FDF6E6; }
+  .doc .verdict.fail{ border-color:#B23A18; background:#FBEDE8; } .doc .verdict.pend{ border-color:#2E4A66; background:#EEF2F6; }
+  .doc .nota{ font-size:10.5px; color:#444; border:1px dashed #888; padding:5px 8px; margin:8px 0; break-inside:avoid; }
+  .doc .croquis{ display:flex; gap:8px; align-items:stretch; margin-bottom:8px; break-inside:avoid; }
+  .doc .croquis > div{ border:1px solid #777; padding:4px; }
+  .doc .croquis .el{ flex:1.9; } .doc .croquis .pl{ flex:1; }
+  .doc .croquis svg{ width:100%; height:auto; display:block; }
+  .doc .croquis .cap{ font-size:10px; text-align:center; color:#444; }
+  .doc .croqui-vazio{ padding:26px 10px; text-align:center; color:#666; font-size:11px; }
+  .doc .assin{ display:grid; grid-template-columns:1fr 1fr; gap:26px 30px; margin-top:26px; break-inside:avoid; }
+  .doc .assin div{ border-top:1px solid #111; padding-top:3px; font-size:11px; text-align:center; }
+  .doc .ficha{ margin-bottom:12px; }
+  .doc .keep{ break-inside:avoid; }
+  .doc .pb{ break-before:page; }
+  .doc .box{ display:inline-block; width:11px; height:11px; border:1px solid #111; vertical-align:-1px; }
+
+  @page{ size:A4; margin:11mm; }
+  @media print{
+    body{ background:#fff; }
+    .ui, .no-print{ display:none !important; }
+    .app{ max-width:none; padding:0; }
+    .docs-area{ display:block !important; }
+    .doc{ display:none !important; box-shadow:none; max-width:none; margin:0; padding:0; overflow:visible; }
+    body[data-print="plano"] #doc-plano, body[data-print="memorial"] #doc-memorial,
+    body[data-print="laudo"] #doc-laudo, body[data-print="checklists"] #doc-checklists{ display:block !important; }
+    body[data-print="all"] .doc{ display:block !important; break-after:page; }
+    body[data-print="all"] .doc:last-child{ break-after:auto; }
+    *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="ui">
+    <div class="header">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <img id="logo-top" alt="Logo Kalfer">
+        <div>
+          <h1>Plano de Rigging Kalfer</h1>
+          <div class="sub">Içamento de telhas e estrutura metálica com munck — gera o plano, o memorial de cálculo, o laudo e os checklists</div>
+        </div>
+      </div>
+      <a class="btn ghost small" href="index.html">← Documentos SST</a>
+    </div>
+
+    <div class="tabs-wrap">
+      <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="dados">1. Dados</button>
+        <button class="tab" data-tab="plano">Plano de Rigging</button>
+        <button class="tab" data-tab="memorial">Memorial de Cálculo</button>
+        <button class="tab" data-tab="laudo">Laudo Técnico</button>
+        <button class="tab" data-tab="checklists">Checklists</button>
+      </div>
+      <div class="tabs-actions">
+        <button class="btn small primary" data-act="print">Imprimir / salvar PDF</button>
+        <button class="btn small" data-act="print-all">Imprimir tudo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ui" id="view-dados"></div>
+  <div class="docs-area" id="view-docs" style="display:none;">
+    <div class="doc" id="doc-plano"></div>
+    <div class="doc" id="doc-memorial"></div>
+    <div class="doc" id="doc-laudo"></div>
+    <div class="doc" id="doc-checklists"></div>
+  </div>
+  <div class="foot ui">Plano de Rigging Kalfer · versão <span id="ver"></span> · Os dados ficam salvos neste navegador. Use “Exportar plano” para guardar ou enviar para outra pessoa.</div>
+</div>
+<input type="file" id="file-import" accept=".json,application/json" style="display:none">
+
+<script>
+const LOGO_DATA_URI = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAACgKADAAQAAAABAAACgAAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgCgAKAAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMABgYGBgYGCgYGCg4KCgoOEg4ODg4SFxISEhISFxwXFxcXFxccHBwcHBwcHCIiIiIiIicnJycnLCwsLCwsLCwsLP/bAEMBBwcHCwoLEwoKEy4fGh8uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLi4uLv/dAAQAKP/aAAwDAQACEQMRAD8AwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoHWilX7w+tAH//QwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApyfeH1ptOj++v1FAnsf/9HCooor54/agooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiul0Twpq+uMDbx7Iu8j8L+HrVRi5OyRjXr06MeerKyOaor2bVPBGmaF4Yvbo5nuVj/1jdAcjoK8Zq6tJ07KRzYDMaWMUpUdk7BRRRWR3hRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABT4v9Yv1FMqSH/Wp/vChCex/9LCooor54/agooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoorR03SdR1ebyNPhaVu5H3R9T0ppN6IipUjCLnN2RnVuaP4c1bXJNtjCSneRuEH4/4V6roHw1tLbbcaywnk6+WPuD6+tenQwRW8YigQIi8AKMAV3UsE3rM+UzDimELwwiu+72/4J55oPw507Tys+pH7VMOcfwA/TvXoqRpGgSNQqjgADAFPpa74U4wVoo+MxWMrYmXPWlc5Xxt/yK1//wBc/wCor5kr6b8bf8itf/8AXP8AqK+ZK8/HfEj7XhH/AHep6/oFFFFcJ9YFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFSwf65P8AeH86iqWD/Xx/7w/nQhS2Z//TwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiipIoZZ5BFChd26KoyT+VAm0ldkdWbSyur+YW9nE0sjdAoz/APqr0bQfhte3e241hjbxnny1++fr6V7DpejabpEIgsIVjHcjqfqetdlLBylrLQ+bzDiWhQvCh70vwPL9B+GZO2411/fyUP8A6E3+Fes2djaafCLeziWJB0CjFXKK9GnSjD4UfEY3Ma+LletL5dAooorQ4QooooA5Xxt/yK1//wBc/wCor5kr6b8bf8itf/8AXP8AqK+ZK8zHfEj77hH/AHep6/oFFFFcJ9YFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFTW/+vj/3h/Ooamt/+PiP/eH86ETLZn//1MKiiivnj9qCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACgAsQqjJPQCut0LwZrGuESKnkQH/lpIMcew6mvadC8F6RoYEiJ5046yScn8B2rppYWc9dkeHmGf4fC3inzS7L9WeT6D8P9V1XbPe/6LAefmHzkew7fjXs+i+GtJ0OMLZRDfjmRuXP41v4pa9KlQhDY+Gx+c4jFu03aPZbCYpaKK2PKCiiigAooooAKKKKAOV8bf8AIrX/AP1z/qK+ZK+m/G3/ACK1/wD9c/6ivmSvMx3xI++4R/3ep6/oFFFFcJ9YFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFTW3/HxH/vD+dQ1Nbf8AHxH/ALw/nTW5M/hZ/9XCooor54/agooooAKKKKACiiigAooooAKKKKACiiigAooooAKK0tM0jUdYmEGnwtIe5/hH1PQV7BoHw2s7XbcaywuJBz5Y+4Pr61tSoTnseZj83w+EX7yWvZbnlWjeG9X1yQCyiPl55kbhB+Pf8K9o0D4f6VpW2e8H2qcc5YfKD7Cu7hhigjEUKhEXgBRgCpa9KlhYQ1erPhsw4gxGJvGHux7L9WNVVUAKMAdhTqKK6TwQooooAKKKKACiiigAooooAKKKKAOV8bf8itf/APXP+or5kr6b8bf8itf/APXP+or5krzMd8SPvuEf93qev6BRRRXCfWBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFdloXgfWdaxKy/ZoD/HIOSPYdaqEJSdoo58RiqWHjz1pWRxtFeweKPCOleH/C0stupeffGDK3XlhnHpXj9XVpOm7MxwGYU8ZB1KS0TsFFFFZHcFFFFABRRRQAUUUUAFFFFABU1t/x8R/7w/nUNTW3/HxH/vD+dNbkz+Fn/9bCooor54/agooooAKKKKACiiigAooooAKKKKACiivSPDXw+n1WNL7UJRHbtyFQhmYfXoKunTlN2icuMxtHCw9pWdkcBaWd1fzC3s4mlkPQKM16xoPwzJ23Guv7+Sh/9Cb/AAr0/TNG03R4RBYQrGO57n6nrWrXpUsHGOs9T4fMeJ61a8MP7q79f+AU7KxtNPhFvZxLEg7KMVbxS0V2WPmJScndsKKKKBBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAHK+Nv+RWv/APrn/UV8yV9N+Nv+RWv/APrn/UV8yV5mO+JH33CP+71PX9AooorhPrAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoorf0bwzq+uuBZxER95H4Ufj3/CnGLk7IyrVqdKPPVlZGBXUaH4Q1nXGDQx+VCessnA/AdTXreg/D7StLKz3v+lTjnLD5AfZf8a9AVFRQqjAHQCu+lgutQ+RzDipK8MIvm/0RxWg+BdH0bbLIv2mcfxuOAfYdBXbAADA4paK74wUVaKPj6+Jq15c9WV2cH8SP+RWl/wCukf8A6EK+dq+ifiR/yK0v/XSP/wBCFfO1eZjvjR95wp/ukv8AE/yQUUUVxn04UUUUAFFFFABRRRQAUUUUAFTW3/HxH/vD+dQ1Nbf8fEf+8P501uTP4Wf/18Kiiivnj9qCiiigAooooAKKKKACiiigAooooAK2tI8QarokvmWExUd0PKn6isWinGTi7ozq0YVYuFRXR7/oHxD0zUdsGpYtZzxk/cJ+vb8a9DV1dQyEEHkEcivj2uo0PxdrGhMFgk8yHvE/K/h6V30sb0qHyOY8LJ3nhHbyf6M+naK4vQfHGka0FiZvs9wf+Wbngn2PQ12eRXfGSkrxZ8bXw9ShLkqxsxaKKKoxCiiigAooooAKKKKACiiigAooooAKKKKAOV8bf8itf/8AXP8AqK+ZK+m/G3/IrX//AFz/AKivmSvMx3xI++4R/wB3qev6BRRRXCfWBRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUVo6bpGo6vN5GnwtKe5H3R9T0FNJt2RFSpGEXKbsjOrY0nQdU1qUR2EJcZ5c8KPqa9W0H4aW1vtuNbfzn6+UvCD69zXqFvbQWsQht0WNF4CqMAV20sE3rM+VzDimnC8MKrvv0/wCCedaD8ONOsdtxqp+1Sjnb0QH6d/xr0iOKOFBHEoVRwABgCn0tehCnGCtFHxmKxtbEy560rhRRRVnKFFFFAHB/Ej/kVpf+ukf/AKEK+dq+ifiR/wAitL/10j/9CFfO1eVjvjR+h8Kf7pL/ABP8kFFFFcZ9OFFFFABRRRQAUUUUAFFFFABU1t/x8R/7w/nUNTW3/HxH/vD+dNbkz+Fn/9DCooor54/agooooAKKKKACiiigAooooAKKKKACiivYNY+GqywLd6I+1mUMYnPHI7HtWkKUppuPQ4cXmNHCyhGu7c19fQ8foq3e2F5p05tr6JopB2Ydfp61UqGraM7IzjJKUXdACQcjiu50Hx5q+kbYLg/abcfwufmA9jXDUVUKkoO8WYYnCUcRHkrRuj6h0TxTpGuoPskoWXvE/DD/AB/Cujr49jkkicSRsVYcgg4Ir0jQPiPf2O231YG5hHG/+MD6969CljU9JnxmY8LTheeFd126/wDBPe6KyNK1zTNZh87T5g/qvRh9RWtXammro+UnCUJOM1Zi0UUUyAooooAKKKKACiiigAooooA5Xxt/yK1//wBc/wCor5kr6b8bf8itf/8AXP8AqK+ZK8zHfEj77hH/AHep6/oFFFFcJ9YFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUVPbWtzeTC3tI2lkboqjJppX2FKSiryehBVuy0+91KYW9jE0rnso6fU9q9O0H4ZzzbbjXH8tevlIfmP1Pb8K9c0/S7DS4RBYwrEg/ujk/U110sHKWs9D5nMOJ6NG8MP7z/D/gnl2g/DJRtn118nr5SHj8T/hXq1nY2lhCLeziWJF6BRirdFejTpRh8KPisZmNfFS5q0r+XQKKKK0OEKKKKACiiigAooooA4P4kf8AIrS/9dI//QhXztX0T8SP+RWl/wCukf8A6EK+dq8rHfGj9D4U/wB0l/if5IKKKK4z6cKKKKACiiigAooooAKKKKACprb/AI+I/wDeH86hqa2/4+I/94fzprcmfws//9HCooor54/agooooAKKKKACiiigAooooAKKKKACvr61/wCPaL/cX+VfINfX1r/x7Rf7i/yr0MB9o+L4w2o/P9CpqWk6fq0Jgv4VlU9MjkfQ9q8f174a3VtuuNFYzJ18pvvj6HvXuVJXZUoxn8SPmsDmmIwjvSlp26Hx/NDNbytDOjRuvBVhgio6+p9Y8N6TrkWy+iBbtIvDj8a8Y174fappe6ex/wBKgHPA+cD3Hf8ACvNq4SUNVqj7jLuI8PiLQqe7L8PvPP6KVlZSVYEEcEHrSVyn0JPa3dzZTLPaSNE68hlODXq2gfEyRNttrqbh085Ov4jvXkVFa060ofCzhxuW4fFxtWjr36n1xY6hZ6lALiylWVD3U/z9Ku18ladquoaTOLiwmaJh6Hg/Ud69f0H4lW1xtt9aQQv081fun6jtXo0sXGWktGfD5hw3XoXnR96P4nq1FQQXEFzEJrd1kRuQynINT11nzjTWjCiiigQUUUUAFFFFAHK+Nv8AkVr/AP65/wBRXzJX0342/wCRWv8A/rn/AFFfMleZjviR99wj/u9T1/QKKKK4T6wKKKKACiiigAooooAKKKKACiiigAooooAKKKciPIwSMFmPAAGSaAbtqxtSRQyzyCKBC7twFUZJ/CvQNC+Hep6jtn1E/ZYTzg8uR9O3417Ho/hvSdEj22MIDd3blj+NddLCSlq9EfPZhxHh8PeFL3peW33nk2hfDa+u9s+sN9nj6+WvLn69hXsOl6JpmjQiGwhWP1b+I/U9a1aWvRp0IQ+FHxGOzXEYt/vZadlsFFFFanmhRRRQAUUUUAFFFFABRRRQAUUUUAcH8SP+RWl/66R/+hCvnavon4kf8itL/wBdI/8A0IV87V5WO+NH6Hwp/ukv8T/JBRRRXGfThRRRQAUUUUAFFFFABRRRQAVNbf8AHxH/ALw/nUNTW3/HxH/vD+dNbkz+Fn//0sKiiivnj9qCiiigAooooAKKKKACiiigAooooAK+vrX/AI9ov9xf5V8g19fWv/HtF/uL/KvQwH2j4vjDaj8/0J6KKK9E+JCkxS0UAcjr3g3SNcBkdPJn7SpwfxHevFte8F6xoZaQp58A6SRjOB7jqK+l6ayhhhhkHtXPVw0J69T2cvzzEYS0U7x7P9D48or6F1/wBpWq7p7MfZZzzlR8pPuK8Y1nw1q+hORexHy+0i8ofx7fjXm1cPOHofdZfneHxekXaXZ/1qYNFFFYHrm1o/iHVdDl32MxC90PKn6ivZtB+Iemaltg1H/RZjxkn5CfY9vxr5/oreliJw22PJzDJcNi9Zq0u6/rU+w1dXUMhDA8gjkGnV8xaH4u1jQmCwSeZDnmJ+V/D0r2jQvHOka0FidhbXB/gc8E+xr0qWJhPTZnw2YZDiMLeVuaPdfqdrRR70V0HiBRRRQByvjb/kVr/wD65/1FfMlfTfjb/kVr/wD65/1FfMleZjviR99wj/u9T1/QKKKK4T6wKKKKACiiigAooooAKKKKACiiigAoAJIAGSe1dfofgrWdaIkCeRAf+Wkgxkew6mvZtC8F6NogEip504/5aScnPsO1dNLCznrsjw8wz/DYW8U+aXZfqzyPQvAWsauVmuB9lgP8Tj5iPZf8a9l0Twno+hqDbRB5e8r8sf8AD8K6bA7UtejSw8IbbnxGPzrE4vSTtHshKWiitzyAooooAKKKKACiiigAooooAKKKKACiiigAooooA4P4kf8AIrS/9dI//QhXztX0T8SP+RWl/wCukf8A6EK+dq8rHfGj9D4U/wB0l/if5IKKKK4z6cKKKKACiiigAooooAKKKKACprb/AI+I/wDeH86hqa2/4+I/94fzprcmfws//9PCooor54/agooooAKKKKACiiigAooooAKKKKACvr61/wCPaL/cX+VfINfX1r/x7Rf7i/yr0MB9o+L4w2o/P9CeiiivRPiQooooAKKKKACopYYp4zFModW4IIyDUtFAJ21R5br/AMNrO63XGjMLeQ8+WfuH6elePano+o6RMYNQhaM9j/Cfoehr6zqpeWNpqEBt7yJZUbswzXJVwkZax0Z9Hl3ElfD2hW96P4/efItFewa98MyN1xoT+/kuf/QT/jXk93Z3VjMbe8iaKReqsMV51SjKHxI+4wWZ4fFxvRlr26legEg5FFFZHedvoPjvV9H2wzN9ptx/A55A9jXtGh+K9H11ALaTZL3ifhvw9fwr5gpyO8bh42KsOQRwRXVSxUoaPVHgZhw9h8TeUPdl3X6o+wqWvAtB+I2o6ftt9UBuoRxu/jA+vf8AGvZNI17S9biEthMHPdDww+or0aVeFTZnw+PyjEYR/vI6d1sZ3jb/AJFa/wD+uf8AUV8yV9NeNv8AkVr/AP65/wBRXzLXFjviR9Xwj/u9T1/QKKKK4T6wKKKKACiiigAooooAKK3dG8N6vrkgWxhOzvI3CD8e/wCFex6D8PNL03bPqH+lzDn5h8gPsP8AGt6WHnPbY8jH51hsJpJ3l2X9aHkuieEtY1xg1vH5cPeV+F/D1r2XQvAWkaRtmnX7TOOdzjgH2FdwqIihEAUDoB0p1ejSwsIa7s+IzDP8TirxT5Y9l+rEUBRgcAUtFFdJ4YUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQBwfxI/5FaX/AK6R/wDoQr52r6J+JH/IrS/9dI//AEIV87V5WO+NH6Hwp/ukv8T/ACQUUUVxn04UUUUAFFFFABRRRQAUUUUAFTW3/HxH/vD+dQ1Nbf8AHxH/ALw/nTW5M/hZ/9TCooor54/agooooAKKKKACiiigAooooAKKKKACvr61/wCPaL/cX+VfINfX1r/x7Rf7i/yr0MB9o+L4w2o/P9CeiiivRPiQooooAKKKKACiiigAooooAKytU0XTdYhMGoQrIOx/iH0PWtWik0noyoTlCSlB2Z4Nr/w3vrLdcaQxuIhzsP3x9PWvNpIpIXMUqlHXgqwwRX2DXO614X0jXUIvIgJMcSLww/HvXFVwSesD6vLuKakLQxSuu/X/AIJ8u0V3WveAtW0jdNag3VuO6j5gPdf8K4Ugg4PBrz505QdpI+0wuLpYiPPRldBU1vc3FrKJ7aRo3U5DKcGoaKlHQ4qSs0d7N47vr7Q7nSNTQSNKm1ZRwc5B+Yd64KiiqnUlL4jnw2DpYfmVGNr6hRRRUHSFFFFABRV/T9L1DVZhBYQtK3fA4H1PQV65oPwzt4ttxrb+a/Xyl4UfU9TW1OhOpsjzcdm2Hwi/ey17Lc8p0rQ9T1mXytPhZ/Vuij6mvYdB+G1hZ7bjV2+0yjnYOEH+Nej21rb2cQhto1jReAqjAqxXo0sJGOr1Z8TmHEeIxF4Uvdj5b/eRRQxQII4VCKOAFGBUtFFdR863fVhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAcH8SP8AkVpf+ukf/oQr52r6J+JH/IrS/wDXSP8A9CFfO1eVjvjR+h8Kf7pL/E/yQUUUVxn04UUUUAFFFFABRRRQAUUUUAFTW3/HxH/vD+dQ1Nbf8fEf+8P501uTP4Wf/9XCooor54/agooooAKKKKACiiigAooooAKKKKACvr61/wCPaL/cX+VfINfX1r/x7Rf7i/yr0MB9o+L4w2o/P9CeiiivRPiQooooAKKKKACiiigAooooAKKKKACiiigBMA9a43XvBOka3ul2eRcHpJHxn6joa7OiplFSVpG1DEVKEuelKzPmPXPCGsaGxeaPzYB0lTkfiOorlq+w3VXBVwCDwQa881/4d6ZqW640/wD0Wc88fcJ9x2/CuCrgutM+xy7ipO0MYvmv1R8/0Vtax4f1XQ5Nl/CVXtIOUP41i1wSi4uzPr6VaFWKnTd0FFFFI0HIhkcRr1Y4GeOteueH/hqsipd6zKGU4IijPB+rf4V5DXT6H4t1jQmC28nmQ55iflfw9K2oSgn+8R5ea0cXUpWwk7P8/n0PpGysLPToRb2USxIOgUYq5XF6D440fWgsLt9nuD/A54J9j3rtAc17MJRkrxPzHE0KtKbjXTT8xaKKKo5wooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDg/iR/wAitL/10j/9CFfO1fRPxI/5FaX/AK6R/wDoQr52rysd8aP0PhT/AHSX+J/kgooorjPpwooooAKKKKACiiigAooooAKmtv8Aj4j/AN4fzqGprb/j4j/3h/OmtyZ/Cz//1sKiiivnj9qCiiigAooooAKKKKACiiigAooooAK+vrX/AI9ov9xf5V8g19fWv/HtF/uL/KvQwH2j4vjDaj8/0J6KKK9E+JCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAgnt4LmIw3CLIjcFWGRXl2v/AA0t591zojCF+vlN9w/Q9q9YpMVnUpRmrSR2YTH18LLmoyt+R8lahpl/pUxt7+FomHqOD9D0NUK+t7/TbHU4Db30SyoezD+VeRa98NJYt1xob716+S/X/gJ/xrz6uDlHWGp9tl3E9GtaGJ919+n/AADyWip7m2uLSYwXUbRSL1Vhg1BXE1bQ+njJSV09ABIORwa7jQfHmraPthnP2q3H8Ln5gPY1w9FXCpKLvFmGJwlLER5K0bo+odE8VaRrqD7JLtlxzE/DD/H8K6Ovj2OSSJxJGxVh0IOCK9J0D4j6hY7bfVgbmIcb/wCMD+tehSxqekz4vMeFpwvPCO67df8AgnvVFZOla3pusw+dp8yyDuvRh9RWtXamnqj5SdOUJOM1ZhRRRTICiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDg/iR/yK0v8A10j/APQhXztX0T8SP+RWl/66R/8AoQr52rysd8aP0PhT/dJf4n+SCiiiuM+nCiiigAooooAKKKKACiiigAqa3/4+I/8AeH86hqa3/wCPiP8A3h/OmtyZbM//18Kiiivnj9qCiiigAooooAKKKKACiiigAooooAK+vrX/AI9ov9xf5V8g19fWv/HtF/uL/KvQwH2j4vjDaj8/0J6KKK9E+JCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigDG1bQdL1qLyr+EP6MOGH0NeO6/wDDjULDdcaSxuohzsPEg/oa97orGpQhPdHp4DNsRhH+7lp2ex8eSRvE5jkUqynBDDBH1FNr6g1zwrpGvIftcQWXHEqcOPx7/jXi+veA9X0fdNbj7Vbj+JB8wH+0v+FedVwsoarVH3GXcQ4fE2hP3Zee3yZw9FFFcp75Ytbu5sphPaSNE69GU4NeqaF8TZUK2+upvXp5yDkf7y9/wryOitadaUPhZwY3LcPi1atH59T63sdSstSgFxYyrNGe6np9R2q7XyVp2qX+lTi40+ZonHoeD9R0Nev6B8S7a422+uJ5L9PNXlD9R1FejSxcZaS0Z8RmPDVehedH3o/ier0VDBcQXMSzW7rIjchlOQfxFTV1nzjTWjCiiigQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAHB/Ej/AJFaX/rpH/6EK+dq+ifiR/yK0v8A10j/APQhXztXlY740fofCn+6S/xP8kFFFFcZ9OFFFFABRRRQAUUUUAFFFFABUtv/AK+P/eH86iqWD/Xp/vD+dCFLZn//0MKiiivnj9qCiiigAooooAKKKKACiiigAooooAK+vrX/AI9ov9xf5V8g19fWv/HtF/uL/KvQwH2j4vjDaj8/0J6KKK9E+JCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKTGetLRQBxW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yivN9B+Ium6ltt9S/wBEnPGT/qyfr2/GvRkdXUMhDAjII5Br0IVIzV4s+LxODrYeXJWjZjqKKKs5gooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigBCARg1wuv+AtI1jdPbj7LcHncg+Un/aWu7oqZwUlaSN8PiatCXPRlZny3rfhfV9Bcm8i3RZ4lTlD9fT8a56vsGSNJUMcihlbggjINea6/wDDewvd1xpBFtKednWMn6dvwrz6uCa1gfZ5dxTGVoYtWfdbHhFFamqaLqejTeTqMLR+jdVb6HpWXXC4tOzPradWFSKnTd0FdBovifV9CcGzlJjzzE/KH8O34Vz9FOMnF3iya1CnWi4VY3R3mtfEHWdVTyLfFpERhhGfmPr83XH0rgySxyTknvRRTnUlN3kzPDYOjh48lGNgoooqDpCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKB1oooA/9TCooor54/agooooAKKKKACiiigAooooAKKKKACiius1nwZrOkRi52efbkBvMjGcAjPzDqKpQbTaRhVxNKnKMKkrN7HJ0UUVJuFdPofi7WNBYLbyeZD3iflfw9PwrmKKqM3F3izGvh6daPJVjdH0hoPjnR9a2ws32a4P/LOQ8E/7LdDXaZr47yRyK7fQfHer6PtgnP2q3H8Dn5gP9lq76WN6VD47MeFWrzwb+T/AEZ9HUVzWieK9H15ALSTbLjmJ+GH09fwrpK74yTV0fIVaM6UnCorMWiiimZhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAFa6s7W9ha3u41ljbqrDIryfXvhmrbrjQX2nr5Lnj/AIC3b8a9horOpSjNWkjtweY18LLmoyt5dD5EvbG806c219E0Mg7MMfl6iqtfWepaRp2rQG31CFZV7ZHI9weorx7X/hrd2m640VvPjHPlNw4+h6GvOq4OUdY6o+3y7iajWtCv7svw/wCAeW0U+WKWCQwzoUdeCrDBH4GmVxn0qaaugooooGFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAf/1cKiiivnj9qCiiigAooooAKKKKACiiigAooooAK+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UAFFFFAHk3xX/wCPGx/66t/6DXide2fFf/jxsf8Arq3/AKDXideRjP4jP0vhn/cY+r/MKKKK5T3wooooAKKKKACiiigAooooAKmt/wDj4j/3h/Ooamt/+PiP/eH86ETLZn//18Kiiivnj9qCiiigAooooAKKKKACiiigAooooAK+j9V8aaPoVskTv59wEX91HyQcfxHoP5184Ucnk1vSrumnbqeXmOVU8bKDqvSN9O97HWa74z1nXSY5H8iA9Io+Bj/aPU1ydFFZTm5O8mduHw1KhHkoxsgoooqTcKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACtPS9Z1LRpvP06Zoz3HVW+o6Gsyimm07oipTjUi4TV0e66D8SbK822+sqLaU8eYOYz9e6/yr0yKWOaNZYmDowyGU5BH1r4+rf0XxNq+hODZSny88xNyh/Dt9RXdSxrWkz5PMeFoSvPCOz7PY+paWuB0Dx/pGrbYLs/ZLg8bXPyMf8AZb/Gu9BBGRyDXoQnGSvFnxmIwtXDy5K0bMWiiiqOcKKKKAPJviv/AMeNj/11b/0GvE69s+K//HjY/wDXVv8A0GvE68jGfxGfpfDP+4x9X+YUUUVynvhRRRQAUUUUAFFFFABRRRQAVNb/APHxH/vD+dQ1Nb/8fEf+8P50ImWzP//QwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArr9B8a6zoZWIP8AaLcf8spDnA/2T1H8q5CiqhNxd4swxGGpV48laN0fTGg+MdH10COKTyZz1ik4P4Hoa6zNfHgJUhgcEdDXf6D8QtV0vbBf/wClwDj5j+8Uezd/xr0KWNT0qHxmYcLSjeeEd12e/wAmfQtFYWjeI9J12PdYTAvj5o24cfUf4Vu13Jpq6Pk6lKdOThUVmeTfFf8A48bH/rq3/oNeJ17Z8V/+PGx/66t/6DXideTjP4jP0fhn/cY+r/MKKKK5T3wooooAKKKKACiiigAooooAKmt/+PiP/eH86hqa3/4+I/8AeH86ETLZn//RwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAJIZpreRZoHMbqchlOCPxFen6D8Sru222+tp58Y481eHH1HQ/zryyitKdWUHeLOLGZfQxUeWtG/n1PW/iLq2n6vpVhcafMsqea2cdR8vcdRXklFFFWp7SXMxZfgY4Sj7CLutQooorM7gooooAKKKKACiiigAooooAKmt/+PiP/AHh/Ooamt/8Aj4j/AN4fzoRMtmf/0sKiiivnj9qCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKmt/8Aj4j/AN4fzqGprf8A4+I/94fzoRMtmf/TwqKKK+eP2oKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAqa3/wCPiP8A3h/Ooamt/wDXx/7w/nTRMtmf/9TCooor54/agooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACpbf/AF8f+8P51FUtv/r4/wDeH86ETLZn/9XCoq8FT+6KkCx/3R+VeByn7M6nkZtFaoSL+4v5U8JF/cX8qOUn23kY9FbOyH+4v5UmyL+4v5UcovbrsY9FaxWL+4v5UwrH/cH5Uco/beRmUVoFY/7o/KmEJ/dFKxXtPIpUVZIX0FMO30FFiuYhoqTj0pvFFh3G0UppKVhhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUtLxQK42ipBj0pw2+gp2C5DRVkBfQU8BP7oosS5lOitELH/dH5VKFi/uL+VPlJdW3QyaK21SH/AJ5r+VTrHb/881/IU+Qh4hLoc7RXVLDbf88k/IVYSC07wp/3yKfszJ4xLocbRXeLbWX/ADwj/wC+RVlLSwPW3i/75FV7HzM3mMV9k86or09LLTjj/Rov++BVlLDTD1tYf++F/wAKfsH3MXm8V9lnk9FewLp2l4/49If++F/wqcaZpX/PpD/3wv8AhVfVn3M3ncF9hnjFFe1DS9J/584f+/a/4Uf2XpP/AD5w/wDfC/4UfVn3J/t2H8jPFaK9nbTNK7WkP/fC/wCFVn03TB0tYf8Avhf8KPqz7lLO4P7DPIaK9Sk0/TgOLaL/AL4H+FUZLKxHSCP/AL5FS6D7m0c1i/ss87qWD/Xx/wC8P512ElraDOIU/wC+RVF4IFIKxqCPQCp9nY6FjFJWsf/WzQaeGquDTt1eAfsjiWA1O3e9V80bqdxcpY30bveoN1JuouLkJi3vTC1R7qaTRcpRHlqaWphNNJpXKSHE00mkzSE0ikhc0maSigqwUUUUgCiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigApc0lFMB2aUGmUoNAmiQGnhqhzSg0EtFgNUob3qoGp4anchxLqv71Mr+9UA1SB6q5nKBpLJ71YSTjrWWr81MslUmYSpmukvTmraS+9YiyVYSWrTOadI3Ul6c1bSb3rBSWrKTVakck6JvJNx1qws3vWEs3FWVmq1I5Z0TaEvvS+b71lCanedVcxi6JotL71XeTrzVUyiomlpORUaQ+R+OtUZH5pXk4qpI9Q2ddOmRSNwaz5DViRutUpGrJs76cT/9k=";
+const RIG_VERSION = '2026111701';
+const LS_PLANO = 'kalfer_rigging_plano_v1';
+const LS_MUNCKS = 'kalfer_rigging_muncks_v1';
+
+/* ---------- Tabelas de apoio (valores típicos, sempre editáveis) ---------- */
+const TELHAS = [
+  { id:'tp_043', nome:'Metálica trapezoidal aço 0,43 mm', kgm2:'4,2' },
+  { id:'tp_050', nome:'Metálica trapezoidal aço 0,50 mm', kgm2:'4,9' },
+  { id:'tp_065', nome:'Metálica trapezoidal aço 0,65 mm', kgm2:'6,3' },
+  { id:'zip_065', nome:'Metálica zipada aço 0,65 mm', kgm2:'6,5' },
+  { id:'ta_pir30', nome:'Termoacústica (sanduíche) PIR/PUR 30 mm', kgm2:'10,5' },
+  { id:'ta_pir50', nome:'Termoacústica (sanduíche) PIR/PUR 50 mm', kgm2:'11,5' },
+  { id:'ta_eps30', nome:'Termoacústica (sanduíche) EPS 30 mm', kgm2:'9,5' },
+  { id:'ta_eps50', nome:'Termoacústica (sanduíche) EPS 50 mm', kgm2:'10,0' },
+  { id:'al_07', nome:'Alumínio trapezoidal 0,7 mm', kgm2:'2,3' },
+  { id:'fc_6', nome:'Fibrocimento ondulada 6 mm', kgm2:'18,0' },
+  { id:'fc_8', nome:'Fibrocimento ondulada 8 mm', kgm2:'24,0' },
+  { id:'outro', nome:'Outra (informar o peso por m²)', kgm2:'' }
+];
+const SOLOS = [
+  { id:'mole', nome:'Aterro / solo mole não compactado', sigma:'0,5' },
+  { id:'medio', nome:'Argila média / areia fofa', sigma:'1,0' },
+  { id:'rijo', nome:'Argila rija / areia medianamente compacta', sigma:'2,0' },
+  { id:'compacto', nome:'Solo compactado / brita / areia compacta', sigma:'3,0' },
+  { id:'piso', nome:'Piso de concreto sobre base compactada', sigma:'4,0' },
+  { id:'outro', nome:'Outro (informar a tensão admissível)', sigma:'' }
+];
+const REDE_DIST = [ [50,3.0], [200,4.6], [350,6.1], [500,7.6], [750,10.7], [Infinity,13.7] ];
+const LINGA_NOME = { cinta:'Cinta têxtil (poliéster)', cabo:'Linga de cabo de aço', corrente:'Linga de corrente' };
+const MODO_NOME = { direto:'Direto (vertical / ponto de pega)', enforcado:'Enforcado (choker)', cesto:'Cesto (basket)' };
+const MODO_FATOR = { direto:1, enforcado:0.8, cesto:2 };
+const ST_NOME = { ok:'APROVADO', warn:'APROVADO COM RESSALVAS', fail:'REPROVADO', pend:'DADOS INCOMPLETOS' };
+const ST_CURTO = { ok:'✔ Atende', warn:'⚠ Ressalva', fail:'✖ Não atende', pend:'… Falta informar' };
+
+/* ---------- Utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function num(v){
+  if(typeof v === 'number') return v;
+  let s = String(v ?? '').trim();
+  if(!s) return NaN;
+  if(s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
+  const n = parseFloat(s);
+  return isFinite(n) ? n : NaN;
+}
+const n0 = v => { const n = num(v); return isFinite(n) ? n : 0; };
+const f = (n, d=2) => isFinite(n) ? n.toLocaleString('pt-BR', { minimumFractionDigits:d, maximumFractionDigits:d }) : '—';
+const uid = () => Math.random().toString(36).slice(2, 9);
+const deg = r => r * 180 / Math.PI;
+function fmtData(s){ if(!s) return '—'; const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s); return m ? `${m[3]}/${m[2]}/${m[1]}` : s; }
+const txt = (s, alt='—') => { const t = String(s ?? '').trim(); return t ? esc(t) : alt; };
+
+/* ---------- Estado ---------- */
+function novoIcamento(tipo){
+  return { id:uid(), tipo, desc:'', qtd:'1',
+    telhaModelo:'ta_pir30', kgm2:'10,5', tPecas:'', tEmb:'0',
+    ePesoModo:'direto', ePeso:'', eKgm:'', eQtd:'1', eAcresc:'5',
+    dimC:'', dimL: tipo==='telha' ? '1,00' : '', dimA:'',
+    raio:'', cota:'', folga:'1,5',
+    lingaTipo: tipo==='telha' ? 'cinta' : 'cabo', pernas:'2', modo: tipo==='telha' ? 'cesto' : 'direto', pernasEf:'auto',
+    lingaComp:'', pegaA:'', pegaB:'', lingaCmt:'', lingaPeso:'',
+    manilhaQtd:'2', manilhaCmt:'', manilhaPeso:'',
+    balancim: 'nao', balPeso:'', balCmt:'', balComp:'', supComp:'', supCmt:'',
+    cabosGuia:'2' };
+}
+function novoPlano(){
+  return {
+    obra:{ nome:'', cliente:'', endereco:'', servico:'Içamento de telhas e estrutura metálica de cobertura', numero:'PR-001', revisao:'00',
+           data:new Date().toISOString().slice(0,10), elaborador:'', respTecnico:'', crea:'', art:'', supervisor:'', operador:'', sinaleiro:'', tst:'' },
+    munck:{ marca:'', modelo:'', placa:'', serie:'', ano:'', momento:'', pesoConjunto:'', abertura:'', alturaPivo:'2,2', lancaMax:'',
+            pesoGancho:'', reacaoFab:'', inspecaoValidade:'', laudoNum:'', tabela:[{raio:'',cap:''},{raio:'',cap:''},{raio:'',cap:''},{raio:'',cap:''}] },
+    local:{ soloTipo:'rijo', sigma:'2,0', calcoL:'80', calcoC:'80', vento:'30', ventoTelha:'20', fc:'1,10', fad:'1,15', utilMax:'80',
+            rede:'nao', redeKv:'13,8', redeDist:'' },
+    icamentos:[ novoIcamento('telha') ]
+  };
+}
+function planoExemplo(){
+  const p = novoPlano();
+  Object.assign(p.obra, { nome:'Galpão Logístico — Cobertura', cliente:'Cliente Exemplo S.A.', endereco:'Av. Exemplo, 1000 — São Paulo/SP',
+    elaborador:'Eduardo Bissi', respTecnico:'(nome do engenheiro responsável)', crea:'(nº CREA)', art:'(nº ART)',
+    supervisor:'(encarregado)', operador:'(operador do munck)', sinaleiro:'(sinaleiro / amarrador)', tst:'(técnico de segurança)' });
+  Object.assign(p.munck, { marca:'EXEMPLO', modelo:'45 t·m (dados fictícios — trocar pelos do manual)', placa:'ABC-1D23', serie:'000000', ano:'2020', momento:'45',
+    pesoConjunto:'23000', abertura:'6,0', alturaPivo:'2,4', lancaMax:'21', pesoGancho:'60', laudoNum:'(nº do laudo)',
+    inspecaoValidade:new Date(Date.now() + 180*864e5).toISOString().slice(0,10),
+    tabela:[['4','9800'],['6','6500'],['8','4700'],['10','3600'],['12','2850'],['14','2300'],['16','1900'],['18','1550'],['20','1300']].map(([raio,cap])=>({raio,cap})) });
+  Object.assign(p.local, { calcoL:'100', calcoC:'100' });
+  const a = novoIcamento('telha');
+  Object.assign(a, { desc:'Fardo de telhas termoacústicas PIR 30 mm', qtd:'12', dimC:'12', dimL:'1,00', dimA:'0,60', tPecas:'15', tEmb:'30',
+    raio:'10', cota:'9', balancim:'sim', balPeso:'180', balCmt:'3000', balComp:'6', supComp:'4,5', supCmt:'2000',
+    pernas:'2', modo:'cesto', lingaComp:'1,5', lingaCmt:'2000', lingaPeso:'12', manilhaQtd:'4', manilhaCmt:'3250', manilhaPeso:'1,2' });
+  const b = novoIcamento('estrutura');
+  Object.assign(b, { desc:'Tesoura metálica T1', qtd:'8', ePesoModo:'direto', ePeso:'1200', dimC:'15', dimL:'0,30', dimA:'1,80',
+    raio:'8', cota:'8', pernas:'2', modo:'direto', lingaComp:'6', pegaA:'7', lingaCmt:'2000', lingaPeso:'14', manilhaQtd:'2', manilhaCmt:'3250', manilhaPeso:'1,2' });
+  p.icamentos = [a, b];
+  return p;
+}
+let S = carregar();
+let abaAtual = 'dados';
+
+function carregar(){
+  try{
+    const raw = localStorage.getItem(LS_PLANO);
+    if(raw) return normalizar(JSON.parse(raw));
+  }catch(e){}
+  return novoPlano();
+}
+function normalizar(p){
+  const base = novoPlano();
+  const out = { obra:{...base.obra, ...(p.obra||{})}, munck:{...base.munck, ...(p.munck||{})}, local:{...base.local, ...(p.local||{})}, icamentos:[] };
+  if(!Array.isArray(out.munck.tabela)) out.munck.tabela = base.munck.tabela;
+  out.icamentos = (Array.isArray(p.icamentos) ? p.icamentos : []).map(ic => ({ ...novoIcamento(ic.tipo === 'estrutura' ? 'estrutura' : 'telha'), ...ic, id: ic.id || uid() }));
+  return out;
+}
+function salvar(){ try{ localStorage.setItem(LS_PLANO, JSON.stringify(S)); }catch(e){} }
+function getPath(path){ return path.split('.').reduce((o,k) => (o == null ? undefined : o[k]), S); }
+function setPath(path, val){
+  const ks = path.split('.'); let o = S;
+  for(let i = 0; i < ks.length - 1; i++) o = o[ks[i]];
+  o[ks[ks.length - 1]] = val;
+}
+function muncksSalvos(){ try{ return JSON.parse(localStorage.getItem(LS_MUNCKS) || '[]'); }catch(e){ return []; } }
+const nomeMunck = m => [m.marca, m.modelo, m.placa].map(x => String(x||'').trim()).filter(Boolean).join(' · ');
+
+/* ---------- Cálculo de um içamento ---------- */
+function calcIc(ic){
+  const m = S.munck, L = S.local, ck = [];
+  const add = (k, nome, st, det) => ck.push({ k, nome, st, det });
+  const fc = num(L.fc) > 0 ? num(L.fc) : 1.10;
+  const fad = num(L.fad) > 0 ? num(L.fad) : 1.15;
+  const utilMax = num(L.utilMax) > 0 ? num(L.utilMax) : 80;
+  const C = num(ic.dimC), Lg = num(ic.dimL), H = num(ic.dimA);
+  const bal = ic.balancim === 'sim';
+
+  // Peso da carga
+  let P = NaN, pesoTxt = '';
+  if(ic.tipo === 'telha'){
+    const k = num(ic.kgm2), n = num(ic.tPecas), emb = n0(ic.tEmb);
+    P = k * C * Lg * n + emb;
+    pesoTxt = `P = peso por m² × comprimento × largura × nº de telhas${emb ? ' + embalagem' : ''} = ${f(k)} × ${f(C)} × ${f(Lg)} × ${f(n,0)}${emb ? ` + ${f(emb,0)}` : ''} = <b>${f(P,0)} kg</b>`;
+  } else if(ic.ePesoModo === 'linear'){
+    const k = num(ic.eKgm), q = num(ic.eQtd) > 0 ? num(ic.eQtd) : 1, ac = n0(ic.eAcresc);
+    P = k * C * q * (1 + ac/100);
+    pesoTxt = `P = peso linear × comprimento × nº de perfis × (1 + acréscimo de ligações) = ${f(k)} kg/m × ${f(C)} m × ${f(q,0)} × ${f(1+ac/100)} = <b>${f(P,0)} kg</b>`;
+  } else {
+    P = num(ic.ePeso);
+    pesoTxt = `P = <b>${f(P,0)} kg</b> (peso informado — conferir com o projeto / romaneio do fabricante)`;
+  }
+  if(!(P > 0)) add('peso', 'Peso da carga', 'pend', 'Informe os dados da carga para calcular o peso.');
+
+  // Acessórios e carga bruta
+  const pLing = n0(ic.lingaPeso), pMan = n0(ic.manilhaQtd) * n0(ic.manilhaPeso), pBal = bal ? n0(ic.balPeso) : 0, pGancho = n0(m.pesoGancho);
+  const Pac = pLing + pMan + pBal + pGancho;
+  const CB = P * fc + Pac;
+
+  // Capacidade no raio
+  const tab = (m.tabela || []).map(t => ({ r:num(t.raio), c:num(t.cap) })).filter(t => t.r > 0 && t.c > 0).sort((a,b) => a.r - b.r);
+  const r = num(ic.raio);
+  let cap = NaN, rTab = NaN, util = NaN;
+  if(!tab.length) add('cap', 'Capacidade do munck no raio', 'pend', 'Preencha a tabela de carga do munck (manual do fabricante).');
+  else if(!(r > 0)) add('cap', 'Capacidade do munck no raio', 'pend', 'Informe o raio de operação.');
+  else {
+    const t = tab.find(t => t.r >= r - 1e-9);
+    if(!t){ cap = 0; add('cap', 'Capacidade do munck no raio', 'fail', `Raio de ${f(r)} m é maior que o maior raio da tabela de carga (${f(tab[tab.length-1].r)} m).`); }
+    else {
+      cap = t.c; rTab = t.r;
+      if(P > 0){
+        util = CB / cap * 100;
+        add('cap', 'Capacidade do munck no raio', util <= utilMax ? 'ok' : 'fail',
+          `Carga bruta ${f(CB,0)} kg ÷ capacidade ${f(cap,0)} kg (raio tabelado ${f(rTab)} m) = ${f(util,1)} % — limite ${f(utilMax,0)} %.`);
+      }
+    }
+  }
+
+  // Lingas
+  const n = Math.max(1, parseInt(ic.pernas) || 1);
+  const nEf = ic.pernasEf === '2' ? Math.min(n, 2) : Math.min(n, 3);
+  const mf = MODO_FATOR[ic.modo] || 1;
+  const Lc = num(ic.lingaComp);
+  const W = P * fc;                      // carga suspensa pelas lingas (inferiores)
+  let beta = NaN, d = 0, hLing = NaN;
+  if(bal || n === 1){ beta = 0; d = 0; hLing = Lc; }
+  else {
+    const a = num(ic.pegaA), b = n >= 4 ? n0(ic.pegaB) : 0;
+    d = Math.sqrt(a*a + b*b) / 2;
+    if(Lc > 0 && a > 0){
+      if(d >= Lc) add('ang', 'Ângulo das lingas', 'fail', `Lingas curtas demais: comprimento ${f(Lc)} m para pontos de pega afastados ${f(d)} m do centro.`);
+      else { beta = Math.asin(d / Lc); hLing = Lc * Math.cos(beta); }
+    } else add('ang', 'Ângulo das lingas', 'pend', 'Informe o comprimento das lingas e a distância entre os pontos de pega.');
+  }
+  if(isFinite(beta) && !bal && n > 1){
+    const bg = deg(beta);
+    add('ang', 'Ângulo das lingas', bg <= 45 ? 'ok' : (bg <= 60 ? 'warn' : 'fail'),
+      `Ângulo com a vertical β = ${f(bg,1)}° ` + (bg <= 45 ? '(até 45°: recomendado).' : bg <= 60 ? '(entre 45° e 60°: permitido, mas use lingas mais longas se possível).' : '(acima de 60°: proibido — use lingas mais longas ou balancim).'));
+  }
+  if((bal || n === 1) && !(Lc > 0)) add('ang', 'Comprimento das lingas', 'pend', 'Informe o comprimento das lingas.');
+  const T = isFinite(beta) && P > 0 ? W * fad / (nEf * Math.cos(beta)) : NaN;   // força por perna
+  const cmtReq = T / mf;
+  const cmt = num(ic.lingaCmt);
+  if(!(cmt > 0)) add('linga', 'Capacidade das lingas', 'pend', 'Informe a CMT (carga máxima de trabalho) de cada linga, gravada na etiqueta.');
+  else if(isFinite(cmtReq)) add('linga', 'Capacidade das lingas', cmt >= cmtReq ? 'ok' : 'fail',
+      `CMT necessária por linga ${f(cmtReq,0)} kg × CMT da linga ${f(cmt,0)} kg (${f(cmtReq/cmt*100,0)} % de uso).`);
+
+  // Manilhas
+  const manQ = n0(ic.manilhaQtd), manCmt = num(ic.manilhaCmt);
+  if(manQ > 0){
+    if(!(manCmt > 0)) add('man', 'Capacidade das manilhas', 'pend', 'Informe a CMT das manilhas.');
+    else if(isFinite(T)) add('man', 'Capacidade das manilhas', manCmt >= T ? 'ok' : 'fail', `Força por ponto ${f(T,0)} kg × CMT da manilha ${f(manCmt,0)} kg.`);
+  }
+
+  // Balancim e lingas superiores
+  let betaS = NaN, Tsup = NaN, hSup = 0, Wbal = NaN;
+  if(bal){
+    const Lb = num(ic.balComp), Ls = num(ic.supComp), bc = num(ic.balCmt), sc = num(ic.supCmt);
+    Wbal = (W + pLing) * fad;
+    if(!(bc > 0)) add('bal', 'Capacidade do balancim', 'pend', 'Informe a CMT do balancim (plaqueta de identificação).');
+    else if(P > 0) add('bal', 'Capacidade do balancim', bc >= Wbal ? 'ok' : 'fail', `Carga no balancim ${f(Wbal,0)} kg × CMT do balancim ${f(bc,0)} kg.`);
+    if(!(Lb > 0) || !(Ls > 0)) add('sup', 'Lingas superiores do balancim', 'pend', 'Informe o comprimento do balancim e das lingas superiores.');
+    else if(Lb/2 >= Ls) add('sup', 'Lingas superiores do balancim', 'fail', 'Lingas superiores curtas demais para o comprimento do balancim.');
+    else {
+      betaS = Math.asin((Lb/2) / Ls); hSup = Ls * Math.cos(betaS);
+      const bg = deg(betaS);
+      Tsup = P > 0 ? (W + pLing + pBal) * fad / (2 * Math.cos(betaS)) : NaN;
+      if(bg > 60) add('sup', 'Lingas superiores do balancim', 'fail', `Ângulo com a vertical ${f(bg,1)}° — acima de 60° é proibido.`);
+      else if(!(sc > 0)) add('sup', 'Lingas superiores do balancim', 'pend', 'Informe a CMT das lingas superiores.');
+      else if(isFinite(Tsup)) add('sup', 'Lingas superiores do balancim', sc < Tsup ? 'fail' : (bg > 45 ? 'warn' : 'ok'),
+        `Força por perna ${f(Tsup,0)} kg × CMT ${f(sc,0)} kg; ângulo com a vertical ${f(bg,1)}°.`);
+    }
+  }
+
+  // Altura e lança
+  const cota = n0(ic.cota), folga = isFinite(num(ic.folga)) ? num(ic.folga) : 1.5;
+  const hp = num(m.alturaPivo), lmax = num(m.lancaMax);
+  const hTot = (isFinite(hLing) ? hLing : NaN) + (bal ? hSup : 0);
+  const Hnec = cota + folga + (H > 0 ? H : 0) + hTot;
+  let Lreq = NaN, angL = NaN;
+  if(!(r > 0) || !isFinite(Hnec) || !(H > 0)) add('lanca', 'Alcance da lança', 'pend', 'Informe raio, altura da carga, cota de montagem e comprimento das lingas.');
+  else if(!(hp > 0) || !(lmax > 0)) add('lanca', 'Alcance da lança', 'pend', 'Informe a altura do pivô e o comprimento máximo de lança do munck.');
+  else {
+    const dh = Math.max(0, Hnec - hp);
+    Lreq = Math.sqrt(r*r + dh*dh); angL = deg(Math.atan2(dh, r));
+    add('lanca', 'Alcance da lança', Lreq <= lmax ? (Lreq > 0.95*lmax ? 'warn' : 'ok') : 'fail',
+      `Altura necessária do gancho ${f(Hnec)} m → lança necessária ≈ ${f(Lreq)} m (ângulo ${f(angL,0)}°) × lança máxima ${f(lmax)} m.`);
+  }
+
+  // Patola e solo
+  const B = num(m.abertura), Wc = num(m.pesoConjunto), Rfab = num(m.reacaoFab);
+  const Q = CB * fad;
+  let Rp = NaN, rpFab = false;
+  if(Rfab > 0){ Rp = Rfab; rpFab = true; }
+  else if(B > 0 && Wc > 0 && r > 0 && P > 0) Rp = Q * (r/B + 0.5) + Wc/2;
+  const A = n0(L.calcoL) * n0(L.calcoC), sigma = num(L.sigma);
+  let pSolo = NaN, Amin = NaN;
+  if(!isFinite(Rp)) add('solo', 'Pressão no solo (patolas)', 'pend', 'Informe o peso do conjunto e a abertura das patolas (ou a reação máxima do fabricante).');
+  else if(!(A > 0) || !(sigma > 0)) add('solo', 'Pressão no solo (patolas)', 'pend', 'Informe as dimensões do calço e a tensão admissível do solo.');
+  else {
+    pSolo = Rp / A; Amin = Rp / sigma;
+    add('solo', 'Pressão no solo (patolas)', pSolo <= sigma ? 'ok' : 'fail',
+      `Reação na patola ${f(Rp,0)} kgf ÷ calço ${f(A,0)} cm² = ${f(pSolo)} kgf/cm² × admissível ${f(sigma)} kgf/cm²` +
+      (pSolo > sigma ? ` — calço mínimo ${f(Math.ceil(Math.sqrt(Amin)),0)} × ${f(Math.ceil(Math.sqrt(Amin)),0)} cm.` : '.'));
+  }
+
+  // Vento
+  const Vlim = ic.tipo === 'telha' ? (num(L.ventoTelha) > 0 ? num(L.ventoTelha) : 20) : (num(L.vento) > 0 ? num(L.vento) : 30);
+  const Av = C > 0 ? C * Math.max(Lg > 0 ? Lg : 0, H > 0 ? H : 0) : NaN;
+  const Fv = isFinite(Av) ? 0.613 * Math.pow(Vlim/3.6, 2) * Av * 1.2 / 9.81 : NaN;
+  const rv = P > 0 ? Fv / P * 100 : NaN;
+  if(isFinite(rv)) add('vento', 'Efeito do vento na carga', rv <= 10 ? 'ok' : 'warn',
+    `Força do vento a ${f(Vlim,0)} km/h ≈ ${f(Fv,0)} kgf (${f(rv,1)} % do peso)` + (rv > 10 ? ' — carga com muita área: usar 2 cabos-guia e reduzir o limite de vento.' : '.'));
+
+  // Rede elétrica
+  let dMin = NaN;
+  if(L.rede === 'sim'){
+    const kv = num(L.redeKv), dist = num(L.redeDist);
+    dMin = (REDE_DIST.find(x => (kv > 0 ? kv : 50) <= x[0]) || REDE_DIST[0])[1];
+    if(!(dist > 0)) add('rede', 'Distância da rede elétrica', 'pend', 'Informe a menor distância entre a rede e a lança/carga em qualquer posição.');
+    else add('rede', 'Distância da rede elétrica', dist >= dMin ? 'ok' : 'fail', `Distância prevista ${f(dist)} m × mínima ${f(dMin,1)} m para ${f(kv,1)} kV.`);
+  }
+
+  const Riso = r > 0 ? r + Math.max(C > 0 ? C : 0, Lg > 0 ? Lg : 0) + 2 : NaN;
+  const st = ck.some(c => c.st === 'fail') ? 'fail' : ck.some(c => c.st === 'pend') ? 'pend' : ck.some(c => c.st === 'warn') ? 'warn' : 'ok';
+  return { ck, st, fc, fad, utilMax, C, Lg, H, bal, P, pesoTxt, pLing, pMan, pBal, pGancho, Pac, CB, r, cap, rTab, util, n, nEf, mf, Lc, W, beta, d, hLing,
+           T, cmtReq, cmt, manQ, manCmt, betaS, Tsup, hSup, Wbal, cota, folga, hp, lmax, Hnec, Lreq, angL, B, Wc, Q, Rp, rpFab, A, sigma, pSolo, Amin,
+           Vlim, Av, Fv, rv, dMin, Riso };
+}
+function calcTudo(){
+  const cs = S.icamentos.map(calcIc);
+  const g = [];
+  const val = S.munck.inspecaoValidade, dt = S.obra.data;
+  if(!val) g.push({ st:'warn', nome:'Inspeção do munck', det:'Validade da inspeção/laudo do munck não informada — conferir antes da operação.' });
+  else if(dt && val < dt) g.push({ st:'fail', nome:'Inspeção do munck', det:`Inspeção/laudo do munck vencido em ${fmtData(val)}.` });
+  else g.push({ st:'ok', nome:'Inspeção do munck', det:`Inspeção/laudo do munck válido até ${fmtData(val)}.` });
+  const all = cs.map(c => c.st).concat(g.map(x => x.st));
+  const st = !cs.length ? 'pend' : all.includes('fail') ? 'fail' : all.includes('pend') ? 'pend' : all.includes('warn') ? 'warn' : 'ok';
+  return { cs, g, st };
+}
+const stOf = (c, k) => (c.ck.find(x => x.k === k) || {}).st;
+const stSpan = st => st ? `<span class="st ${st}">${ST_CURTO[st]}</span>` : '';
+const icNome = (ic, i) => `Içamento ${i+1} — ${ic.desc ? esc(ic.desc) : (ic.tipo === 'telha' ? 'Telhas' : 'Estrutura metálica')}`;
+
+/* ---------- Formulário ---------- */
+function inp(label, path, o = {}){
+  const v = getPath(path) ?? '';
+  const tipo = o.type || 'text';
+  return `<label class="fld ${o.cls||''}"><span>${label}${o.unit ? ` <em>(${o.unit})</em>` : ''}</span>` +
+    `<input type="${tipo}" ${tipo === 'text' && !o.text ? 'inputmode="decimal"' : ''} data-path="${path}" value="${esc(v)}" placeholder="${esc(o.ph||'')}">` +
+    (o.hint ? `<small>${o.hint}</small>` : '') + `</label>`;
+}
+function sel(label, path, opts, o = {}){
+  const v = String(getPath(path) ?? '');
+  return `<label class="fld ${o.cls||''}"><span>${label}</span><select data-path="${path}" data-rr="1">` +
+    opts.map(([val, nome]) => `<option value="${esc(val)}" ${String(val) === v ? 'selected' : ''}>${esc(nome)}</option>`).join('') +
+    `</select>${o.hint ? `<small>${o.hint}</small>` : ''}</label>`;
+}
+function icCard(ic, i){
+  const p = `icamentos.${i}.`, isT = ic.tipo === 'telha', bal = ic.balancim === 'sim', n = parseInt(ic.pernas) || 1;
+  let carga;
+  if(isT){
+    carga = sel('Tipo de telha', p+'telhaModelo', TELHAS.map(t => [t.id, t.nome]), { cls:'w2' }) +
+      inp('Peso da telha', p+'kgm2', { unit:'kg/m²', hint:'Valor típico — confira no catálogo do fabricante.' }) +
+      inp('Comprimento da telha', p+'dimC', { unit:'m' }) + inp('Largura da telha', p+'dimL', { unit:'m' }) +
+      inp('Telhas por fardo', p+'tPecas') + inp('Altura do fardo', p+'dimA', { unit:'m' }) + inp('Embalagem / calços', p+'tEmb', { unit:'kg' });
+  } else {
+    carga = sel('Como informar o peso', p+'ePesoModo', [['direto','Peso total da peça'],['linear','Peso por metro do perfil']]) +
+      (ic.ePesoModo === 'linear'
+        ? inp('Peso do perfil', p+'eKgm', { unit:'kg/m' }) + inp('Nº de perfis na peça', p+'eQtd') + inp('Acréscimo de ligações', p+'eAcresc', { unit:'%' })
+        : inp('Peso da peça', p+'ePeso', { unit:'kg', hint:'Do projeto ou romaneio do fabricante.' })) +
+      inp('Comprimento da peça', p+'dimC', { unit:'m' }) + inp('Largura', p+'dimL', { unit:'m' }) + inp('Altura', p+'dimA', { unit:'m' });
+  }
+  return `<div class="panel ic">
+    <div class="panel-head"><h3>${icNome(ic, i)}</h3><span class="chip" id="chip-${ic.id}"></span><span class="sp"></span>
+      <button class="btn small ghost" data-act="dup-ic" data-i="${i}">Duplicar</button>
+      <button class="btn small danger" data-act="del-ic" data-i="${i}">Excluir</button></div>
+    <div class="sub-h">Carga</div>
+    <div class="grid">
+      ${inp('Descrição da carga', p+'desc', { text:1, cls:'w2', ph: isT ? 'Ex.: Fardo de telhas termoacústicas' : 'Ex.: Tesoura T1, viga V3, terças…' })}
+      ${inp('Nº de içamentos iguais', p+'qtd')}
+      ${carga}
+    </div>
+    <div class="sub-h">Posição</div>
+    <div class="grid">
+      ${inp('Raio de operação', p+'raio', { unit:'m', hint:'Do centro de giro do munck ao centro da carga, no ponto mais distante.' })}
+      ${inp('Altura do ponto de montagem', p+'cota', { unit:'m', hint:'Altura onde a carga será apoiada.' })}
+      ${inp('Folga sobre o ponto de montagem', p+'folga', { unit:'m' })}
+    </div>
+    <div class="sub-h">Amarração</div>
+    <div class="grid">
+      ${sel('Usa balancim?', p+'balancim', [['nao','Não'],['sim','Sim']], { hint: isT ? 'Recomendado para telhas com mais de 6 m.' : '' })}
+      ${sel(bal ? 'Lingas inferiores (tipo)' : 'Tipo de linga', p+'lingaTipo', Object.entries(LINGA_NOME))}
+      ${sel(bal ? 'Nº de lingas inferiores' : 'Nº de pernas / lingas', p+'pernas', [['1','1'],['2','2'],['3','3'],['4','4']])}
+      ${sel('Forma de amarração', p+'modo', Object.entries(MODO_NOME))}
+      ${n >= 3 ? sel('Pernas consideradas no cálculo', p+'pernasEf', [['auto','3 (critério de norma)'],['2','2 (mais conservador)']]) : ''}
+      ${inp(bal ? 'Comprimento das lingas inferiores' : 'Comprimento de cada perna', p+'lingaComp', { unit:'m', hint:'Do gancho (ou balancim) até o ponto de pega.' })}
+      ${!bal && n >= 2 ? inp(n >= 4 ? 'Distância entre pegas (comprimento)' : 'Distância entre os pontos de pega', p+'pegaA', { unit:'m' }) : ''}
+      ${!bal && n >= 4 ? inp('Distância entre pegas (largura)', p+'pegaB', { unit:'m' }) : ''}
+      ${inp('CMT de cada linga', p+'lingaCmt', { unit:'kg', hint:'Carga máxima de trabalho na vertical (etiqueta).' })}
+      ${inp('Peso total das lingas', p+'lingaPeso', { unit:'kg' })}
+      ${inp('Nº de manilhas', p+'manilhaQtd')} ${inp('CMT de cada manilha', p+'manilhaCmt', { unit:'kg' })} ${inp('Peso de cada manilha', p+'manilhaPeso', { unit:'kg' })}
+      ${bal ? inp('Peso do balancim', p+'balPeso', { unit:'kg' }) + inp('CMT do balancim', p+'balCmt', { unit:'kg' }) + inp('Comprimento do balancim', p+'balComp', { unit:'m' }) +
+              inp('Lingas superiores: comprimento', p+'supComp', { unit:'m', hint:'2 pernas, do gancho às pontas do balancim.' }) + inp('Lingas superiores: CMT por perna', p+'supCmt', { unit:'kg' }) : ''}
+      ${inp('Nº de cabos-guia', p+'cabosGuia')}
+    </div>
+    <div class="res" id="res-${ic.id}"></div>
+  </div>`;
+}
+function renderForm(){
+  const o = 'obra.', m = 'munck.', l = 'local.';
+  const salvos = muncksSalvos();
+  $('#view-dados').innerHTML = `
+    <div class="aviso"><b>Importante:</b> este sistema faz as contas e monta os documentos, mas não substitui o engenheiro. O plano de rigging, o memorial e o laudo só valem depois de conferidos e assinados por profissional legalmente habilitado, com ART. A tabela de carga deve ser copiada do manual do fabricante do munck — nunca use valores estimados.</div>
+    <div class="toolbar">
+      <button class="btn small" data-act="novo">Novo plano</button>
+      <button class="btn small ghost" data-act="exemplo">Preencher com exemplo</button>
+      <button class="btn small ghost" data-act="export">Exportar plano</button>
+      <button class="btn small ghost" data-act="import">Importar plano</button>
+    </div>
+    <div class="summary" id="summary"></div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>1. Obra e responsáveis</h2></div>
+      <div class="grid">
+        ${inp('Obra', o+'nome', { text:1, cls:'w2' })} ${inp('Cliente', o+'cliente', { text:1 })} ${inp('Endereço', o+'endereco', { text:1, cls:'w2' })}
+        ${inp('Serviço', o+'servico', { text:1, cls:'w2' })} ${inp('Nº do plano', o+'numero', { text:1 })} ${inp('Revisão', o+'revisao', { text:1 })}
+        ${inp('Data do içamento', o+'data', { type:'date' })}
+        ${inp('Elaborado por', o+'elaborador', { text:1 })} ${inp('Responsável técnico (engenheiro)', o+'respTecnico', { text:1 })}
+        ${inp('CREA', o+'crea', { text:1 })} ${inp('Nº da ART', o+'art', { text:1 })}
+        ${inp('Supervisor do içamento', o+'supervisor', { text:1 })} ${inp('Operador do munck', o+'operador', { text:1 })}
+        ${inp('Sinaleiro / amarrador', o+'sinaleiro', { text:1 })} ${inp('Técnico de segurança', o+'tst', { text:1 })}
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>2. Munck (guindauto)</h2><span class="sp"></span>
+        <select id="sel-munck" style="padding:6px 8px; border:1.5px solid var(--line); border-radius:3px; font-size:13px; max-width:260px;">
+          <option value="">Muncks salvos (${salvos.length})…</option>
+          ${salvos.map((x, i) => `<option value="${i}">${esc(nomeMunck(x) || 'Sem nome')}</option>`).join('')}
+        </select>
+        <button class="btn small ghost" data-act="load-munck">Usar</button>
+        <button class="btn small ghost" data-act="del-munck">Apagar</button>
+        <button class="btn small" data-act="save-munck">Salvar este munck</button>
+      </div>
+      <div class="grid">
+        ${inp('Marca', m+'marca', { text:1 })} ${inp('Modelo', m+'modelo', { text:1, cls:'w2' })} ${inp('Placa do caminhão', m+'placa', { text:1 })}
+        ${inp('Nº de série', m+'serie', { text:1 })} ${inp('Ano', m+'ano', { text:1 })} ${inp('Momento de carga nominal', m+'momento', { unit:'t·m' })}
+        ${inp('Peso total do conjunto (caminhão + munck)', m+'pesoConjunto', { unit:'kg' })}
+        ${inp('Abertura total das patolas', m+'abertura', { unit:'m', hint:'Distância entre as duas sapatas, totalmente abertas.' })}
+        ${inp('Altura do pivô da lança', m+'alturaPivo', { unit:'m', hint:'Do chão até a articulação da lança na coluna.' })}
+        ${inp('Comprimento máximo de lança', m+'lancaMax', { unit:'m', hint:'Com todas as extensões.' })}
+        ${inp('Peso do gancho / moitão', m+'pesoGancho', { unit:'kg' })}
+        ${inp('Reação máxima na patola (fabricante)', m+'reacaoFab', { unit:'kgf', hint:'Opcional. Se vazio, o sistema estima de forma conservadora.' })}
+        ${inp('Validade da inspeção / laudo do munck', m+'inspecaoValidade', { type:'date' })} ${inp('Nº do laudo / ART do munck', m+'laudoNum', { text:1 })}
+      </div>
+      <div class="sub-h">Tabela de carga (copiar do manual do fabricante)</div>
+      <table class="tc"><thead><tr><th>Raio (m)</th><th>Capacidade (kg)</th><th></th></tr></thead><tbody>
+        ${S.munck.tabela.map((t, i) => `<tr><td><input inputmode="decimal" data-path="munck.tabela.${i}.raio" value="${esc(t.raio)}"></td>
+          <td><input inputmode="decimal" data-path="munck.tabela.${i}.cap" value="${esc(t.cap)}"></td>
+          <td><button class="xbtn" data-act="del-row" data-i="${i}" title="Remover linha">✕</button></td></tr>`).join('')}
+      </tbody></table>
+      <button class="btn small ghost" data-act="add-row">+ Linha</button>
+      <p class="hint">O sistema nunca interpola para cima: para um raio que não está na tabela, usa a capacidade do raio tabelado seguinte (maior), que é o valor mais seguro.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>3. Local e critérios de segurança</h2></div>
+      <div class="grid">
+        ${sel('Tipo de solo no patolamento', l+'soloTipo', SOLOS.map(s => [s.id, s.nome]), { cls:'w2' })}
+        ${inp('Tensão admissível do solo', l+'sigma', { unit:'kgf/cm²', hint:'Valor indicativo — confirmar com o responsável.' })}
+        ${inp('Calço da patola: largura', l+'calcoL', { unit:'cm' })} ${inp('Calço da patola: comprimento', l+'calcoC', { unit:'cm' })}
+        ${inp('Vento máximo — estruturas', l+'vento', { unit:'km/h' })} ${inp('Vento máximo — telhas', l+'ventoTelha', { unit:'km/h' })}
+        ${inp('Contingência do peso (Fc)', l+'fc', { hint:'1,10 = 10 % a mais no peso da carga.' })}
+        ${inp('Fator dinâmico (FAD)', l+'fad', { hint:'Aplicado nas lingas, manilhas e patolas.' })}
+        ${inp('Utilização máxima do munck', l+'utilMax', { unit:'%' })}
+        ${sel('Há rede elétrica aérea próxima?', l+'rede', [['nao','Não'],['sim','Sim']])}
+        ${S.local.rede === 'sim' ? inp('Tensão da rede', l+'redeKv', { unit:'kV' }) + inp('Menor distância rede × lança/carga', l+'redeDist', { unit:'m' }) : ''}
+      </div>
+    </div>
+
+    <div class="panel-head" style="margin-top:22px;"><h2>4. Içamentos</h2><span class="sp"></span>
+      <button class="btn small primary" data-act="add-telha">+ Içamento de telhas</button>
+      <button class="btn small primary" data-act="add-estr">+ Içamento de estrutura metálica</button></div>
+    ${S.icamentos.map(icCard).join('') || '<div class="panel">Nenhum içamento cadastrado. Use os botões acima para adicionar.</div>'}
+  `;
+  atualizarResultados();
+}
+function atualizarResultados(){
+  const R = calcTudo();
+  S.icamentos.forEach((ic, i) => {
+    const c = R.cs[i], chip = $('#chip-' + ic.id), res = $('#res-' + ic.id);
+    if(chip){ chip.className = 'chip ' + c.st; chip.textContent = ST_NOME[c.st]; }
+    if(res) res.innerHTML = `<div class="res-nums">
+        <div>Peso da carga<b>${f(c.P,0)} kg</b></div><div>Carga bruta<b>${f(c.CB,0)} kg</b></div>
+        <div>Capacidade no raio<b>${c.cap > 0 ? f(c.cap,0) + ' kg' : '—'}</b></div><div>Utilização<b>${isFinite(c.util) ? f(c.util,1) + ' %' : '—'}</b></div>
+        <div>Altura do gancho<b>${isFinite(c.Hnec) ? f(c.Hnec,1) + ' m' : '—'}</b></div></div>` +
+      c.ck.map(x => `<div class="ck ${x.st}"><i></i><span><b>${x.nome}:</b> ${x.det}</span></div>`).join('');
+  });
+  const sm = $('#summary');
+  if(sm) sm.innerHTML = `<b>Situação do plano:</b> <span class="chip ${R.st}">${ST_NOME[R.st]}</span>
+    <span>${S.icamentos.length} içamento(s) cadastrado(s)</span>` + R.g.filter(x => x.st !== 'ok').map(x => `<span class="chip ${x.st}">${x.det}</span>`).join('');
+  return R;
+}
+
+/* ---------- Croquis ---------- */
+function croquiElev(ic, c){
+  if(!(c.r > 0) || !isFinite(c.Hnec)) return '<div class="croqui-vazio">Croqui disponível depois de informar raio, alturas e lingas.</div>';
+  const hp = c.hp > 0 ? c.hp : 2.2, B = c.B > 0 ? c.B : 5, r = c.r, H = c.H > 0 ? c.H : 0.15;
+  const dMin = Math.max((c.bal ? n0(ic.balComp)/2 : c.d) * 1.1, 0.5);
+  const hw = Math.min(Math.max(c.C > 0 ? c.C/2 : 1, dMin), Math.max(r * 0.55, dMin));
+  const xmin = -Math.max(B/2, 1.6) - 0.8, xmax = r + hw + 2.2, ymin = -1.5, ymax = Math.max(c.Hnec, c.cota) + 1.0;
+  const Wp = 760, Hp = 400, s = Math.min((Wp - 30) / (xmax - xmin), (Hp - 20) / (ymax - ymin));
+  const X = x => (15 + (x - xmin) * s).toFixed(1), Y = y => (Hp - 10 - (y - ymin) * s).toFixed(1);
+  const rect = (x1, y1, x2, y2, extra) => `<rect x="${X(x1)}" y="${Y(y2)}" width="${((x2-x1)*s).toFixed(1)}" height="${((y2-y1)*s).toFixed(1)}" ${extra}/>`;
+  const line = (x1, y1, x2, y2, extra) => `<line x1="${X(x1)}" y1="${Y(y1)}" x2="${X(x2)}" y2="${Y(y2)}" ${extra}/>`;
+  const yb = c.cota + c.folga, yt = yb + H, lw = c.bal ? Math.min(n0(ic.balComp)/2, hw) : Math.min(c.d, hw);
+  let g = '';
+  g += line(xmin, 0, xmax, 0, 'stroke="#111" stroke-width="2"');
+  if(c.cota > 0) g += rect(r - hw - 0.4, 0, r + hw + 0.4, c.cota, 'fill="#ECE9E1" stroke="#777" stroke-width="1"') +
+    `<text x="${X(r)}" y="${Y(c.cota/2)}" font-size="17" text-anchor="middle" fill="#444">Ponto de montagem — ${f(c.cota,1)} m</text>`;
+  // caminhão (vista de trás) e patolas
+  g += rect(-1.2, 0, -0.75, 0.95, 'fill="#333"') + rect(0.75, 0, 1.2, 0.95, 'fill="#333"') + rect(-1.25, 0.9, 1.25, 1.75, 'fill="#C9CED3" stroke="#333" stroke-width="1"');
+  g += line(-B/2, 0.8, B/2, 0.8, 'stroke="#2E4A66" stroke-width="4"') + line(-B/2, 0.8, -B/2, 0.12, 'stroke="#2E4A66" stroke-width="4"') + line(B/2, 0.8, B/2, 0.12, 'stroke="#2E4A66" stroke-width="4"');
+  g += rect(-B/2 - 0.4, 0, -B/2 + 0.4, 0.12, 'fill="#C25E12"') + rect(B/2 - 0.4, 0, B/2 + 0.4, 0.12, 'fill="#C25E12"');
+  // coluna e lança
+  g += line(0, 1.75, 0, hp, 'stroke="#2E4A66" stroke-width="7" stroke-linecap="round"') + line(0, hp, r, c.Hnec, 'stroke="#2E4A66" stroke-width="5" stroke-linecap="round"');
+  g += `<circle cx="${X(0)}" cy="${Y(hp)}" r="5" fill="#fff" stroke="#2E4A66" stroke-width="2"/><circle cx="${X(r)}" cy="${Y(c.Hnec)}" r="4" fill="#111"/>`;
+  // lingas
+  const ls = 'stroke="#B23A18" stroke-width="1.6"';
+  if(c.bal){
+    const yBal = c.Hnec - c.hSup;
+    g += line(r, c.Hnec, r - lw, yBal, ls) + line(r, c.Hnec, r + lw, yBal, ls) + line(r - lw, yBal, r + lw, yBal, 'stroke="#111" stroke-width="4"');
+    g += line(r - lw, yBal, r - lw, yt, ls) + line(r + lw, yBal, r + lw, yt, ls);
+  } else if(c.n === 1) g += line(r, c.Hnec, r, yt, ls);
+  else g += line(r, c.Hnec, r - lw, yt, ls) + line(r, c.Hnec, r + lw, yt, ls);
+  g += rect(r - hw, yb, r + hw, yt, 'fill="#FBE7D6" stroke="#C25E12" stroke-width="1.5"');
+  g += `<text x="${X(r)}" y="${(+Y(yb) + 19).toFixed(1)}" font-size="17" text-anchor="middle" fill="#8a3f08">Carga ${f(c.P,0)} kg</text>`;
+  // cotas
+  const cs = 'stroke="#111" stroke-width="1"';
+  g += line(0, -0.75, r, -0.75, cs) + line(0, -0.95, 0, -0.55, cs) + line(r, -0.95, r, -0.55, cs) + line(0, 0, 0, -0.75, 'stroke="#999" stroke-width=".6" stroke-dasharray="3 3"') + line(r, yb, r, -0.75, 'stroke="#999" stroke-width=".6" stroke-dasharray="3 3"');
+  g += `<text x="${X(r/2)}" y="${(+Y(-0.75) + 21).toFixed(1)}" font-size="19" font-weight="600" text-anchor="middle">Raio R = ${f(r)} m</text>`;
+  const xc = r + hw + 1.2;
+  g += line(xc, 0, xc, c.Hnec, cs) + line(xc - 0.2, 0, xc + 0.2, 0, cs) + line(xc - 0.2, c.Hnec, xc + 0.2, c.Hnec, cs);
+  g += `<text transform="translate(${(+X(xc) + 20).toFixed(1)},${Y(c.Hnec/2)}) rotate(-90)" font-size="19" font-weight="600" text-anchor="middle">Altura do gancho = ${f(c.Hnec)} m</text>`;
+  if(isFinite(c.Lreq)) g += `<text x="16" y="24" font-size="17" fill="#2E4A66">Lança ≈ ${f(c.Lreq,1)} m · ângulo ${f(c.angL,0)}°</text>`;
+  return `<svg viewBox="0 0 ${Wp} ${Hp}" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">${g}</svg>`;
+}
+function croquiPlanta(ic, c){
+  if(!(c.r > 0)) return '<div class="croqui-vazio">Planta disponível depois de informar o raio.</div>';
+  const Z = 380, cx = Z/2, cy = Z/2, Rm = (isFinite(c.Riso) ? c.Riso : c.r + 3) + 0.8, s = (Z/2 - 14) / Rm, B = c.B > 0 ? c.B : 5;
+  const px = v => (v * s).toFixed(1);
+  const cl = c.C > 0 ? c.C : 1, cw = Math.max(c.Lg > 0 ? c.Lg : 0.3, 0.3);
+  let g = `<circle cx="${cx}" cy="${cy}" r="${px(c.Riso)}" fill="#FBEDE8" stroke="#B23A18" stroke-width="1.4" stroke-dasharray="7 4"/>`;
+  g += `<circle cx="${cx}" cy="${cy}" r="${px(c.r)}" fill="#fff" stroke="#2E4A66" stroke-width="1.2" stroke-dasharray="4 3"/>`;
+  g += `<rect x="${(cx - 1.25*s).toFixed(1)}" y="${(cy - 2.2*s).toFixed(1)}" width="${px(2.5)}" height="${px(8.5)}" fill="#C9CED3" stroke="#333" stroke-width="1"/>`;
+  g += `<line x1="${(cx - B/2*s).toFixed(1)}" y1="${cy}" x2="${(cx + B/2*s).toFixed(1)}" y2="${cy}" stroke="#2E4A66" stroke-width="3"/>`;
+  [-1, 1].forEach(k => g += `<rect x="${(cx + k*B/2*s - 0.4*s).toFixed(1)}" y="${(cy - 0.4*s).toFixed(1)}" width="${px(0.8)}" height="${px(0.8)}" fill="#C25E12"/>`);
+  g += `<line x1="${cx}" y1="${cy}" x2="${(cx + c.r*s).toFixed(1)}" y2="${cy}" stroke="#2E4A66" stroke-width="2.5"/><circle cx="${cx}" cy="${cy}" r="3.5" fill="#2E4A66"/>`;
+  g += `<rect x="${(cx + c.r*s - cw*s/2).toFixed(1)}" y="${(cy - cl*s/2).toFixed(1)}" width="${px(cw)}" height="${px(cl)}" fill="#FBE7D6" stroke="#C25E12" stroke-width="1.3"/>`;
+  g += `<text x="${cx}" y="${(cy - c.Riso*s + 21).toFixed(1)}" font-size="17" text-anchor="middle" fill="#B23A18">Isolamento: raio ${f(c.Riso,1)} m</text>`;
+  g += `<text x="${cx}" y="${(cy + c.Riso*s - 10).toFixed(1)}" font-size="17" text-anchor="middle" fill="#2E4A66">Raio de operação: ${f(c.r,1)} m</text>`;
+  return `<svg viewBox="0 0 ${Z} ${Z}" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif">${g}</svg>`;
+}
+
+/* ---------- Documentos ---------- */
+function docHeader(titulo){
+  const o = S.obra;
+  return `<table class="dh"><tr><td style="width:1%"><img src="${LOGO_DATA_URI}" alt="Kalfer"></td>
+    <td class="dh-tit"><div class="t1">${titulo}</div><div class="t2">${txt(o.nome, 'Obra não informada')} — ${txt(o.cliente, 'cliente não informado')}</div></td>
+    <td class="dh-meta">Nº: <b>${txt(o.numero)}</b><br>Revisão: <b>${txt(o.revisao)}</b><br>Data: <b>${fmtData(o.data)}</b></td></tr></table>`;
+}
+function verdictBox(R){
+  const msg = {
+    ok:'Todas as verificações foram atendidas com os dados informados.',
+    warn:'Verificações atendidas, com ressalvas que devem ser tratadas antes da operação (ver itens marcados).',
+    fail:'Há verificações NÃO atendidas. O içamento não pode ser realizado nas condições informadas.',
+    pend:'Faltam dados para concluir as verificações. Este documento NÃO deve ser emitido nem usado em campo.' }[R.st];
+  return `<div class="verdict ${R.st}"><b>RESULTADO: ${ST_NOME[R.st]}</b><br>${msg}</div>`;
+}
+const notaLegal = () => `<div class="nota"><b>Validade:</b> documento gerado pelo sistema Plano de Rigging Kalfer a partir dos dados informados pelo usuário (pesos, dimensões, tabela de carga do fabricante e acessórios).
+  Só tem validade após conferência e assinatura de profissional legalmente habilitado, com a respectiva ART. Qualquer mudança de carga, raio, equipamento, acessórios ou posição do munck exige revisão do plano.</div>`;
+function assinaturas(lista){
+  return `<div class="assin">${lista.map(([nome, papel]) => `<div><b>${txt(nome, '&nbsp;')}</b><br>${papel}</div>`).join('')}</div>`;
+}
+function tabelaCargaHtml(){
+  const tab = S.munck.tabela.filter(t => num(t.raio) > 0 && num(t.cap) > 0).sort((a,b) => num(a.raio) - num(b.raio));
+  if(!tab.length) return '<p><i>Tabela de carga não informada.</i></p>';
+  return `<table class="t" style="width:auto"><tr><th>Raio (m)</th>${tab.map(t => `<td class="n">${f(num(t.raio),1)}</td>`).join('')}</tr>
+    <tr><th>Capacidade (kg)</th>${tab.map(t => `<td class="n">${f(num(t.cap),0)}</td>`).join('')}</tr></table>`;
+}
+function acessoriosTxt(ic, c){
+  const a = [];
+  a.push(`${c.n} ${c.bal ? 'linga(s) inferior(es)' : 'perna(s)/linga(s)'} — ${LINGA_NOME[ic.lingaTipo]}, ${f(c.Lc)} m, CMT ${f(c.cmt,0)} kg cada, amarração ${MODO_NOME[ic.modo].toLowerCase()}`);
+  if(c.manQ > 0) a.push(`${f(c.manQ,0)} manilha(s) CMT ${f(c.manCmt,0)} kg`);
+  if(c.bal) a.push(`Balancim de ${f(num(ic.balComp))} m, CMT ${f(num(ic.balCmt),0)} kg, com 2 lingas superiores de ${f(num(ic.supComp))} m, CMT ${f(num(ic.supCmt),0)} kg cada`);
+  a.push(`${f(n0(ic.cabosGuia),0)} cabo(s)-guia`);
+  return a;
+}
+function fichaIc(ic, i, c){
+  return `<div class="ficha"><h3>${icNome(ic, i)} <span class="st ${c.st}" style="float:right">${ST_NOME[c.st]}</span></h3>
+    <table class="t keep"><tr><th>Carga</th><td>${txt(ic.desc)} (${ic.tipo === 'telha' ? 'telhas' : 'estrutura metálica'})</td><th>Nº de içamentos</th><td>${txt(ic.qtd)}</td></tr>
+      <tr><th>Dimensões (C × L × A)</th><td>${f(c.C)} × ${f(c.Lg)} × ${f(c.H)} m</td><th>Peso da carga</th><td>${f(c.P,0)} kg</td></tr>
+      <tr><th>Carga bruta de cálculo</th><td>${f(c.CB,0)} kg (carga × ${f(c.fc)} + acessórios ${f(c.Pac,0)} kg)</td><th>Raio máximo de operação</th><td><b>${f(c.r)} m</b></td></tr>
+      <tr><th>Capacidade do munck no raio</th><td>${c.cap > 0 ? f(c.cap,0) + ' kg' : '—'}</td><th>Utilização</th><td><b>${isFinite(c.util) ? f(c.util,1) + ' %' : '—'}</b> (limite ${f(c.utilMax,0)} %)</td></tr>
+      <tr><th>Altura do ponto de montagem</th><td>${f(c.cota)} m</td><th>Altura necessária do gancho</th><td>${f(c.Hnec)} m</td></tr>
+      <tr><th>Ângulo das lingas (com a vertical)</th><td>${c.bal ? 'Lingas inferiores na vertical; superiores ' + f(deg(c.betaS),1) + '°' : f(deg(c.beta),1) + '°'}</td><th>Força por perna</th><td>${f(c.T,0)} kg</td></tr>
+      <tr><th>Vento máximo</th><td>${f(c.Vlim,0)} km/h</td><th>Raio de isolamento</th><td>${f(c.Riso,1)} m</td></tr>
+      <tr><th>Acessórios</th><td colspan="3">${acessoriosTxt(ic, c).join('; ')}.</td></tr></table>
+    <div class="croquis"><div class="el">${croquiElev(ic, c)}<div class="cap">Vista lateral esquemática</div></div>
+      <div class="pl">${croquiPlanta(ic, c)}<div class="cap">Planta — raio de operação e área isolada</div></div></div>
+    <table class="t"><tr><th style="width:30%">Verificação</th><th>Resultado</th><th style="width:16%">Situação</th></tr>
+      ${c.ck.map(x => `<tr><td>${x.nome}</td><td>${x.det}</td><td>${stSpan(x.st)}</td></tr>`).join('')}</table></div>`;
+}
+function renderPlano(R){
+  const o = S.obra, m = S.munck, L = S.local;
+  const temT = S.icamentos.some(x => x.tipo === 'telha'), temE = S.icamentos.some(x => x.tipo === 'estrutura');
+  const rMaxIso = Math.max(0, ...R.cs.map(c => isFinite(c.Riso) ? c.Riso : 0));
+  const rpMax = Math.max(0, ...R.cs.map(c => isFinite(c.Rp) ? c.Rp : 0));
+  const lado = L.sigma && rpMax ? Math.ceil(Math.sqrt(rpMax / num(L.sigma))) : NaN;
+  const dMin = R.cs.map(c => c.dMin).find(isFinite);
+  $('#doc-plano').innerHTML = docHeader('Plano de Rigging — Içamento de Cargas com Munck') + verdictBox(R) + `
+    <h2>1. Identificação</h2>
+    <table class="t"><tr><th style="width:18%">Obra</th><td>${txt(o.nome)}</td><th style="width:18%">Cliente</th><td>${txt(o.cliente)}</td></tr>
+      <tr><th>Endereço</th><td colspan="3">${txt(o.endereco)}</td></tr>
+      <tr><th>Serviço</th><td colspan="3">${txt(o.servico)}</td></tr>
+      <tr><th>Data prevista</th><td>${fmtData(o.data)}</td><th>Elaborado por</th><td>${txt(o.elaborador)}</td></tr>
+      <tr><th>Responsável técnico</th><td>${txt(o.respTecnico)} — CREA ${txt(o.crea)}</td><th>ART</th><td>${txt(o.art)}</td></tr></table>
+    <h2>2. Objetivo</h2>
+    <p>Definir as condições seguras para o içamento e posicionamento de ${[temT ? 'telhas' : '', temE ? 'peças de estrutura metálica' : ''].filter(Boolean).join(' e ') || 'cargas'} com caminhão guindauto (munck): equipamento, cargas, raio de operação, acessórios de içamento, patolamento, isolamento de área, limites operacionais, equipe e sequência de execução. O içamento só pode ocorrer nas condições descritas neste plano.</p>
+    <h2>3. Normas e documentos de referência</h2>
+    <ul><li>NR-11 — Transporte, movimentação, armazenagem e manuseio de materiais; NR-12 — Máquinas e equipamentos; NR-18 — Indústria da construção; NR-35 — Trabalho em altura; NR-06 — EPI${L.rede === 'sim' ? '; NR-10 — Serviços em eletricidade (proximidade de rede)' : ''}.</li>
+      <li>ABNT NBR 14768 — Guindaste articulado hidráulico; ABNT NBR 11436 — Sinalização manual para movimentação de carga.</li>
+      <li>ABNT NBR 15637 — Cintas têxteis; ABNT NBR 13541 — Lingas de cabo de aço; ABNT NBR ISO 4309 — Cabos de aço (inspeção e descarte); ABNT NBR 15516 — Lingas de corrente; ABNT NBR 13545 — Manilhas.</li>
+      <li>Manual de operação e tabela de carga do fabricante do munck; Memorial de Cálculo ${txt(o.numero)} (anexo); APR e Permissão de Trabalho da atividade.</li></ul>
+    <p style="font-size:10.5px">O responsável técnico deve confirmar a edição vigente de cada norma.</p>
+    <h2>4. Equipamento de guindar</h2>
+    <table class="t"><tr><th style="width:22%">Marca / modelo</th><td>${txt(m.marca)} ${txt(m.modelo, '')}</td><th style="width:22%">Placa / nº de série</th><td>${txt(m.placa)} / ${txt(m.serie)}</td></tr>
+      <tr><th>Momento de carga nominal</th><td>${txt(m.momento)} t·m</td><th>Ano</th><td>${txt(m.ano)}</td></tr>
+      <tr><th>Peso do conjunto</th><td>${f(num(m.pesoConjunto),0)} kg</td><th>Abertura das patolas</th><td>${f(num(m.abertura))} m</td></tr>
+      <tr><th>Lança máxima</th><td>${f(num(m.lancaMax))} m</td><th>Inspeção / laudo do munck</th><td>${txt(m.laudoNum)} — válido até ${fmtData(m.inspecaoValidade)}</td></tr>
+      <tr><th>Operador</th><td colspan="3">${txt(o.operador)}</td></tr></table>
+    <p><b>Tabela de carga do fabricante</b> (cópia da tabela original deve ficar anexa a este plano e legível no equipamento):</p>
+    ${tabelaCargaHtml()}
+    <h2>5. Resumo dos içamentos</h2>
+    <table class="t"><tr><th class="c">Nº</th><th>Carga</th><th class="c">Qtd.</th><th class="n">Peso (kg)</th><th class="n">Carga bruta (kg)</th><th class="n">Raio (m)</th><th class="n">Capac. (kg)</th><th class="n">Utiliz.</th><th>Situação</th></tr>
+      ${S.icamentos.map((ic, i) => { const c = R.cs[i]; return `<tr><td class="c">${i+1}</td><td>${txt(ic.desc, ic.tipo === 'telha' ? 'Telhas' : 'Estrutura metálica')}</td><td class="c">${txt(ic.qtd)}</td>
+        <td class="n">${f(c.P,0)}</td><td class="n">${f(c.CB,0)}</td><td class="n">${f(c.r)}</td><td class="n">${c.cap > 0 ? f(c.cap,0) : '—'}</td><td class="n">${isFinite(c.util) ? f(c.util,1) + ' %' : '—'}</td><td><span class="st ${c.st}">${ST_NOME[c.st]}</span></td></tr>`; }).join('')}</table>
+    ${R.g.map(x => `<p>${stSpan(x.st)} ${x.det}</p>`).join('')}
+    <h2>6. Fichas de içamento</h2>
+    ${S.icamentos.map((ic, i) => fichaIc(ic, i, R.cs[i])).join('')}
+    <h2>7. Patolamento e solo</h2>
+    <ul><li>Solo considerado: ${esc((SOLOS.find(s => s.id === L.soloTipo) || {}).nome || '—')}, tensão admissível ${f(num(L.sigma))} kgf/cm² (confirmar no local antes de patolar).</li>
+      <li>Maior reação prevista em uma patola: <b>${rpMax ? f(rpMax,0) + ' kgf' : '—'}</b>. Calço previsto: ${f(n0(L.calcoL),0)} × ${f(n0(L.calcoC),0)} cm${isFinite(lado) ? ` (mínimo calculado: ${f(lado,0)} × ${f(lado,0)} cm)` : ''}, em madeira de lei ou chapa de aço, sem trincas.</li>
+      <li>Patolas totalmente estendidas, sapatas centradas nos calços, equipamento nivelado e rodas calçadas.</li>
+      <li>Não patolar sobre lajes, tampas, caixas de passagem, galerias, valas reaterradas ou a menos de 2 m da borda de taludes e escavações sem verificação de engenheiro.</li></ul>
+    <h2>8. Limites de operação</h2>
+    <ul><li>Vento máximo (medido com anemômetro no local): <b>${f(n0(L.vento),0)} km/h</b> para estruturas${temT ? ` e <b>${f(n0(L.ventoTelha),0)} km/h</b> para telhas e peças de grande área` : ''}. Acima disso, baixar a carga e suspender o serviço.</li>
+      <li>Suspender com chuva forte, raios, neblina ou iluminação insuficiente.</li>
+      <li>Nunca ultrapassar o raio máximo de cada ficha. Carga sempre na vertical do gancho: proibido arrastar ou puxar de lado.</li>
+      <li>${L.rede === 'sim' ? `Rede elétrica aérea de ${txt(L.redeKv)} kV próxima: manter no mínimo <b>${isFinite(dMin) ? f(dMin,1) : '—'} m</b> entre a rede e qualquer parte do munck, lingas ou carga; sinaleiro exclusivo para vigiar a distância.` : 'Não foi informada rede elétrica aérea na área de giro. Se houver, parar e revisar o plano.'}</li>
+      <li>Proibida a permanência ou passagem de pessoas sob carga suspensa.</li></ul>
+    <h2>9. Isolamento e sinalização</h2>
+    <p>Isolar com cones, fita zebrada ou cerquite e placas de “Risco de queda de materiais — movimentação de cargas” um raio mínimo de <b>${rMaxIso ? f(rMaxIso,1) : '—'} m</b> a partir do centro de giro do munck (raio de operação + maior dimensão da carga + 2 m), incluindo o trajeto da carga e a área abaixo do ponto de montagem. Acesso apenas à equipe do içamento.</p>
+    <h2>10. Equipe e responsabilidades</h2>
+    <table class="t"><tr><th style="width:24%">Função</th><th style="width:26%">Nome</th><th>Responsabilidade</th></tr>
+      <tr><td>Responsável técnico</td><td>${txt(o.respTecnico)}</td><td>Aprovar este plano e suas revisões; definir condições de execução.</td></tr>
+      <tr><td>Supervisor do içamento</td><td>${txt(o.supervisor)}</td><td>Coordenar a operação, garantir o cumprimento do plano e liberar cada içamento.</td></tr>
+      <tr><td>Operador do munck</td><td>${txt(o.operador)}</td><td>Inspecionar e operar o equipamento dentro da tabela de carga; obedecer apenas ao sinaleiro (sinal de PARE: de qualquer pessoa).</td></tr>
+      <tr><td>Sinaleiro / amarrador de cargas</td><td>${txt(o.sinaleiro)}</td><td>Inspecionar acessórios, amarrar a carga, orientar o operador por sinais/rádio e conduzir os cabos-guia.</td></tr>
+      <tr><td>Técnico de segurança</td><td>${txt(o.tst)}</td><td>Verificar APR/PT, isolamento, EPI e condições do tempo; interromper em caso de risco.</td></tr></table>
+    <p>Todos com ASO válido, treinamentos em dia (NR-11/NR-12 para operador e sinaleiro; NR-35 para trabalho em altura) e EPI: capacete com jugular, calçado de segurança, luvas, óculos, colete refletivo e cinto paraquedista para quem trabalha em altura.</p>
+    <h2>11. Sequência operacional</h2>
+    <ol><li>Reunião de pré-içamento (DDS) com toda a equipe: leitura deste plano, funções, sinais e canal de rádio.</li>
+      <li>Conferir documentos: plano assinado, APR/PT, inspeção do munck e certificados dos acessórios.</li>
+      <li>Inspecionar munck e acessórios pelos checklists anexos; acessório reprovado é retirado e identificado.</li>
+      <li>Posicionar o caminhão conforme a planta, em piso firme e nivelado; calçar rodas; abrir totalmente as patolas sobre os calços e nivelar.</li>
+      <li>Isolar e sinalizar a área; retirar pessoas não envolvidas. Medir o vento.</li>
+      <li>Amarrar a carga conforme a ficha de içamento, com proteção nos cantos vivos e cabos-guia instalados.</li>
+      <li>Içamento de teste: elevar cerca de 20 cm, parar e conferir equilíbrio da carga, lingas, patolas e sustentação do equipamento.</li>
+      <li>Elevar, girar e posicionar devagar, sem trancos, sem ultrapassar o raio máximo, conduzindo a carga pelos cabos-guia.</li>
+      <li>Apoiar a carga no local definitivo. Só afrouxar e soltar as lingas com a carga apoiada, estável e travada.</li>
+      <li>Ao terminar: recolher lança e patolas, retirar o isolamento e registrar as ocorrências.</li></ol>
+    ${temT ? `<h3>Cuidados específicos — telhas</h3><ul>
+      <li>Içar somente fardos cintados; nunca telhas soltas. Usar cintas têxteis com protetores de canto (não usar cabo de aço direto na telha).</li>
+      <li>Telhas com mais de 6 m: usar balancim, para não dobrar nem amassar as telhas.</li>
+      <li>Apoiar os fardos sobre as terças, junto aos pórticos/tesouras, distribuídos conforme orientação do projetista da estrutura — não concentrar fardos no meio do vão.</li>
+      <li>Amarrar os fardos à estrutura logo após o apoio. Telhas soltas devem ser fixadas ou amarradas ao fim de cada jornada (risco de vento).</li>
+      <li>Equipe na cobertura sempre ancorada em linha de vida; ninguém entre a carga e a borda.</li></ul>` : ''}
+    ${temE ? `<h3>Cuidados específicos — estrutura metálica</h3><ul>
+      <li>Conferir o peso de cada peça no projeto/romaneio e marcar os pontos de pega em relação ao centro de gravidade.</li>
+      <li>Peças longas e esbeltas (tesouras, treliças, terças): verificar a estabilidade lateral no içamento; usar balancim ou pontos de pega travados quando indicado pelo projetista.</li>
+      <li>Só soltar as lingas depois da fixação mínima definida pelo projetista (parafusos de montagem/solda) e do contraventamento provisório.</li>
+      <li>Montadores em plataforma elevatória ou ancorados em linha de vida; proibido subir ou “pegar carona” na peça içada.</li></ul>` : ''}
+    <h2>12. Comunicação</h2>
+    <p>Um único sinaleiro orienta o operador, por sinais manuais padronizados (ABNT NBR 11436) e/ou rádio em canal exclusivo, testado antes do início. Se o operador perder o contato visual ou de rádio com o sinaleiro, a movimentação para imediatamente.</p>
+    <h2>13. Emergências</h2>
+    <ul><li>Qualquer pessoa pode dar o sinal de PARE. A operação só recomeça depois de avaliada pelo supervisor.</li>
+      <li>Vento forte repentino ou mudança do tempo: baixar a carga em local seguro e suspender.</li>
+      <li>Vazamento ou falha hidráulica, afundamento de patola ou inclinação do caminhão: parar, baixar a carga se for seguro, isolar a área e acionar a manutenção.</li>
+      <li>Contato com rede elétrica: afastar todas as pessoas (mínimo 10 m), não tocar no caminhão nem na carga, acionar a concessionária e o Corpo de Bombeiros.</li>
+      <li>Acidente com vítima: SAMU 192 / Bombeiros 193; comunicar imediatamente o supervisor e o técnico de segurança.</li></ul>
+    <div class="keep">${notaLegal()}
+    ${assinaturas([[o.elaborador, 'Elaboração'], [o.respTecnico, 'Responsável técnico — CREA ' + txt(o.crea, '______') + ' — ART ' + txt(o.art, '______')], [o.supervisor, 'Supervisor do içamento'], [o.tst, 'Técnico de segurança']])}</div>`;
+}
+function memoIc(ic, i, c){
+  const L = S.local;
+  let h = `<h3>2.${i+1} ${icNome(ic, i)}</h3>
+    <div class="calc"><b>a) Peso da carga</b><br>${c.pesoTxt}</div>
+    <div class="calc"><b>b) Carga bruta de cálculo (CB)</b><br>Acessórios = lingas ${f(c.pLing,0)} + manilhas ${f(c.pMan,0)} + balancim ${f(c.pBal,0)} + gancho/moitão ${f(c.pGancho,0)} = ${f(c.Pac,0)} kg<br>
+      CB = P × Fc + acessórios = ${f(c.P,0)} × ${f(c.fc)} + ${f(c.Pac,0)} = <b>${f(c.CB,0)} kg</b></div>
+    <div class="calc"><b>c) Capacidade do munck e utilização</b> ${stSpan(stOf(c,'cap'))}<br>Raio de operação R = ${f(c.r)} m → raio tabelado adotado (igual ou imediatamente maior) = ${f(c.rTab)} m → capacidade = ${c.cap > 0 ? f(c.cap,0) : '—'} kg<br>
+      Utilização = CB ÷ capacidade = ${f(c.CB,0)} ÷ ${c.cap > 0 ? f(c.cap,0) : '—'} = <b>${f(c.util,1)} %</b> (limite adotado ${f(c.utilMax,0)} %)<br>
+      Momento atuante = CB × R = ${f(c.CB * c.r / 1000,1)} t·m (nominal do equipamento: ${txt(S.munck.momento)} t·m)</div>`;
+  if(c.bal){
+    h += `<div class="calc"><b>d) Lingas inferiores (verticais, sob o balancim)</b> ${stSpan(stOf(c,'linga'))}<br>
+      Força por linga T = P × Fc × FAD ÷ n = ${f(c.P,0)} × ${f(c.fc)} × ${f(c.fad)} ÷ ${c.nEf} = <b>${f(c.T,0)} kg</b><br>
+      CMT necessária = T ÷ fator da amarração (${MODO_NOME[ic.modo].toLowerCase()} = ${f(c.mf,1)}) = <b>${f(c.cmtReq,0)} kg</b> × CMT da linga ${f(c.cmt,0)} kg</div>
+    <div class="calc"><b>e) Balancim e lingas superiores</b> ${stSpan(stOf(c,'bal'))} ${stSpan(stOf(c,'sup'))}<br>
+      Carga no balancim = (P × Fc + lingas) × FAD = (${f(c.W,0)} + ${f(c.pLing,0)}) × ${f(c.fad)} = <b>${f(c.Wbal,0)} kg</b> × CMT do balancim ${f(num(ic.balCmt),0)} kg<br>
+      Ângulo das lingas superiores com a vertical: β = arcsen[(comprimento do balancim ÷ 2) ÷ comprimento da linga] = arcsen(${f(num(ic.balComp)/2)} ÷ ${f(num(ic.supComp))}) = <b>${f(deg(c.betaS),1)}°</b> (máx. 60°)<br>
+      Força por perna superior = (P × Fc + lingas + balancim) × FAD ÷ (2 × cos β) = (${f(c.W,0)} + ${f(c.pLing,0)} + ${f(c.pBal,0)}) × ${f(c.fad)} ÷ (2 × ${f(Math.cos(c.betaS),3)}) = <b>${f(c.Tsup,0)} kg</b> × CMT ${f(num(ic.supCmt),0)} kg</div>`;
+  } else {
+    h += `<div class="calc"><b>d) Lingas</b> ${stSpan(stOf(c,'ang'))} ${stSpan(stOf(c,'linga'))}<br>` +
+      (c.n > 1 ? `Ângulo com a vertical: β = arcsen(distância do ponto de pega ao centro ÷ comprimento da perna) = arcsen(${f(c.d)} ÷ ${f(c.Lc)}) = <b>${f(deg(c.beta),1)}°</b> (recomendado até 45°; máximo 60°)<br>` : 'Linga única na vertical (β = 0°).<br>') +
+      `Pernas consideradas no cálculo: n = ${c.nEf}${c.n >= 4 ? ' (em conjuntos de 4 pernas considera-se que nem todas trabalham igualmente)' : ''}<br>
+      Força por perna T = P × Fc × FAD ÷ (n × cos β) = ${f(c.P,0)} × ${f(c.fc)} × ${f(c.fad)} ÷ (${c.nEf} × ${f(Math.cos(c.beta),3)}) = <b>${f(c.T,0)} kg</b><br>
+      CMT necessária = T ÷ fator da amarração (${MODO_NOME[ic.modo].toLowerCase()} = ${f(c.mf,1)}) = <b>${f(c.cmtReq,0)} kg</b> × CMT da linga ${f(c.cmt,0)} kg</div>`;
+  }
+  if(c.manQ > 0) h += `<div class="calc"><b>${c.bal ? 'f' : 'e'}) Manilhas</b> ${stSpan(stOf(c,'man'))}<br>Força no ponto de ligação = ${f(c.T,0)} kg × CMT da manilha ${f(c.manCmt,0)} kg</div>`;
+  h += `<div class="calc"><b>Altura do gancho e lança</b> ${stSpan(stOf(c,'lanca'))}<br>
+      Altura necessária do gancho = ponto de montagem + folga + altura da carga + altura da amarração = ${f(c.cota)} + ${f(c.folga)} + ${f(c.H)} + ${f(c.Hnec - c.cota - c.folga - (c.H > 0 ? c.H : 0))} = <b>${f(c.Hnec)} m</b><br>
+      Lança necessária ≈ √[R² + (altura − pivô)²] = √[${f(c.r)}² + (${f(c.Hnec)} − ${f(c.hp)})²] = <b>${f(c.Lreq)} m</b>, ângulo ${f(c.angL,0)}° × lança máxima ${f(c.lmax)} m (verificação geométrica simplificada)</div>
+    <div class="calc"><b>Reação na patola e pressão no solo</b> ${stSpan(stOf(c,'solo'))}<br>` +
+      (c.rpFab ? `Reação máxima na patola informada pelo fabricante: <b>${f(c.Rp,0)} kgf</b><br>`
+        : `Estimativa conservadora (lança perpendicular ao caminhão, todo o peso do conjunto sobre as duas patolas): Rp = CB × FAD × (R ÷ B + 0,5) + Pconjunto ÷ 2<br>
+           Rp = ${f(c.CB,0)} × ${f(c.fad)} × (${f(c.r)} ÷ ${f(c.B)} + 0,5) + ${f(c.Wc,0)} ÷ 2 = <b>${f(c.Rp,0)} kgf</b><br>`) +
+      `Pressão no solo = Rp ÷ área do calço = ${f(c.Rp,0)} ÷ (${f(n0(L.calcoL),0)} × ${f(n0(L.calcoC),0)} cm) = <b>${f(c.pSolo)} kgf/cm²</b> × admissível ${f(c.sigma)} kgf/cm²<br>
+      Área mínima de calço = Rp ÷ σadm = ${f(c.Amin,0)} cm² (≈ ${f(Math.ceil(Math.sqrt(c.Amin)),0)} × ${f(Math.ceil(Math.sqrt(c.Amin)),0)} cm)</div>
+    <div class="calc"><b>Efeito do vento na carga</b> ${stSpan(stOf(c,'vento'))}<br>
+      Fv = 0,613 × V² × A × Cf ÷ 9,81, com V = ${f(c.Vlim,0)} km/h = ${f(c.Vlim/3.6)} m/s, A = ${f(c.Av)} m² (maior face), Cf = 1,2 → Fv ≈ <b>${f(c.Fv,0)} kgf</b> (${f(c.rv,1)} % do peso da carga)</div>`;
+  if(isFinite(c.dMin)) h += `<div class="calc"><b>Rede elétrica</b> ${stSpan(stOf(c,'rede'))}<br>Distância mínima adotada para ${txt(L.redeKv)} kV: ${f(c.dMin,1)} m × distância prevista ${f(num(L.redeDist))} m</div>`;
+  h += `<p><b>Resultado do içamento ${i+1}:</b> <span class="st ${c.st}">${ST_NOME[c.st]}</span></p>`;
+  return h;
+}
+function renderMemorial(R){
+  const L = S.local, c0 = R.cs[0] || { fc:n0(L.fc), fad:n0(L.fad), utilMax:n0(L.utilMax) };
+  $('#doc-memorial').innerHTML = docHeader('Memorial de Cálculo — Içamento de Cargas com Munck') + verdictBox(R) + `
+    <h2>1. Critérios e dados de entrada</h2>
+    <table class="t"><tr><th style="width:40%">Critério</th><th>Valor adotado</th></tr>
+      <tr><td>Contingência do peso da carga (Fc)</td><td>${f(c0.fc)} — cobre incertezas de peso (tolerâncias, umidade, pintura, embalagem)</td></tr>
+      <tr><td>Fator de amplificação dinâmica (FAD)</td><td>${f(c0.fad)} — aplicado em lingas, manilhas, balancim e patolas</td></tr>
+      <tr><td>Utilização máxima da capacidade do munck</td><td>${f(c0.utilMax,0)} % da capacidade tabelada no raio</td></tr>
+      <tr><td>Capacidade no raio</td><td>Tabela de carga do fabricante; para raio intermediário adota-se o raio tabelado imediatamente maior (sem interpolação)</td></tr>
+      <tr><td>Ângulo das lingas com a vertical</td><td>Recomendado até 45°; máximo 60°</td></tr>
+      <tr><td>Fator da forma de amarração</td><td>Direto 1,0; enforcado 0,8; cesto 2,0 (sobre a CMT vertical da linga)</td></tr>
+      <tr><td>Pernas efetivas</td><td>1 perna: 1; 2 pernas: 2; 3 e 4 pernas: 3 (ou 2, quando indicado na ficha)</td></tr>
+      <tr><td>Capacidade dos acessórios</td><td>CMT (carga máxima de trabalho) gravada pelo fabricante, que já inclui o fator de segurança do acessório</td></tr>
+      <tr><td>Solo</td><td>${esc((SOLOS.find(s => s.id === L.soloTipo) || {}).nome || '—')} — σadm = ${f(num(L.sigma))} kgf/cm²; calço ${f(n0(L.calcoL),0)} × ${f(n0(L.calcoC),0)} cm</td></tr>
+      <tr><td>Vento limite</td><td>${f(n0(L.vento),0)} km/h (estruturas) e ${f(n0(L.ventoTelha),0)} km/h (telhas)</td></tr></table>
+    <p><b>Equipamento:</b> ${txt(S.munck.marca)} ${txt(S.munck.modelo, '')} — placa ${txt(S.munck.placa)} — peso do conjunto ${f(num(S.munck.pesoConjunto),0)} kg — abertura das patolas ${f(num(S.munck.abertura))} m — lança máxima ${f(num(S.munck.lancaMax))} m.</p>
+    ${tabelaCargaHtml()}
+    <h2>2. Verificações por içamento</h2>
+    ${S.icamentos.map((ic, i) => memoIc(ic, i, R.cs[i])).join('') || '<p><i>Nenhum içamento cadastrado.</i></p>'}
+    <div class="keep"><h2>3. Conclusão</h2>
+    ${verdictBox(R)} ${notaLegal()}
+    ${assinaturas([[S.obra.elaborador, 'Elaboração'], [S.obra.respTecnico, 'Responsável técnico — CREA ' + txt(S.obra.crea, '______') + ' — ART ' + txt(S.obra.art, '______')]])}</div>`;
+}
+function renderLaudo(R){
+  const o = S.obra, m = S.munck;
+  const ress = [];
+  S.icamentos.forEach((ic, i) => R.cs[i].ck.filter(x => x.st !== 'ok').forEach(x => ress.push(`Içamento ${i+1} — ${x.nome}: ${x.det} ${stSpan(x.st)}`)));
+  R.g.filter(x => x.st !== 'ok').forEach(x => ress.push(`${x.det} ${stSpan(x.st)}`));
+  const concl = {
+    ok:'Com base nos dados informados e nas verificações do Memorial de Cálculo, os içamentos descritos são considerados <b>TECNICAMENTE VIÁVEIS</b>, desde que executados nas condições do Plano de Rigging.',
+    warn:'Com base nos dados informados, os içamentos são considerados <b>TECNICAMENTE VIÁVEIS COM RESSALVAS</b>. As ressalvas listadas no item 5 devem ser resolvidas ou aceitas formalmente pelo responsável técnico antes da operação.',
+    fail:'Com base nos dados informados, os içamentos <b>NÃO SÃO VIÁVEIS</b> nas condições apresentadas. É necessário rever equipamento, raio, acessórios ou patolamento e emitir nova revisão.',
+    pend:'<b>Não é possível concluir</b>: faltam dados de entrada. Este laudo não deve ser emitido.' }[R.st];
+  $('#doc-laudo').innerHTML = docHeader('Laudo Técnico de Içamento de Carga') + `
+    <h2>1. Identificação</h2>
+    <table class="t"><tr><th style="width:20%">Obra</th><td>${txt(o.nome)}</td><th style="width:20%">Cliente</th><td>${txt(o.cliente)}</td></tr>
+      <tr><th>Endereço</th><td colspan="3">${txt(o.endereco)}</td></tr>
+      <tr><th>Serviço</th><td colspan="3">${txt(o.servico)}</td></tr>
+      <tr><th>Equipamento</th><td>${txt(m.marca)} ${txt(m.modelo, '')} — placa ${txt(m.placa)}</td><th>Data prevista</th><td>${fmtData(o.data)}</td></tr></table>
+    <h2>2. Objeto</h2>
+    <p>Avaliação técnica da viabilidade e das condições de segurança dos içamentos de carga previstos no Plano de Rigging ${txt(o.numero)}, revisão ${txt(o.revisao)}, com caminhão guindauto (munck).</p>
+    <h2>3. Documentos analisados</h2>
+    <ul><li>Plano de Rigging ${txt(o.numero)} rev. ${txt(o.revisao)} e respectivo Memorial de Cálculo.</li>
+      <li>Tabela de carga e manual do fabricante do munck; inspeção/laudo do equipamento nº ${txt(m.laudoNum)}, válido até ${fmtData(m.inspecaoValidade)}.</li>
+      <li>Dados de peso e dimensões das cargas e identificação (CMT) dos acessórios de içamento informados pela obra.</li></ul>
+    <h2>4. Verificações realizadas e resultados</h2>
+    <p>Para cada içamento foram verificados: capacidade do munck no raio de operação, ângulo e capacidade das lingas, manilhas e balancim, alcance da lança, reação nas patolas e pressão no solo, efeito do vento e distância de redes elétricas.</p>
+    <table class="t"><tr><th class="c">Nº</th><th>Carga</th><th class="n">Carga bruta (kg)</th><th class="n">Raio (m)</th><th class="n">Capac. (kg)</th><th class="n">Utiliz.</th><th class="n">Lingas (uso)</th><th class="n">Solo (kgf/cm²)</th><th>Situação</th></tr>
+      ${S.icamentos.map((ic, i) => { const c = R.cs[i]; return `<tr><td class="c">${i+1}</td><td>${txt(ic.desc, ic.tipo === 'telha' ? 'Telhas' : 'Estrutura metálica')}</td><td class="n">${f(c.CB,0)}</td><td class="n">${f(c.r)}</td>
+        <td class="n">${c.cap > 0 ? f(c.cap,0) : '—'}</td><td class="n">${isFinite(c.util) ? f(c.util,1) + ' %' : '—'}</td><td class="n">${isFinite(c.cmtReq) && c.cmt > 0 ? f(c.cmtReq / c.cmt * 100,0) + ' %' : '—'}</td>
+        <td class="n">${f(c.pSolo)}</td><td><span class="st ${c.st}">${ST_NOME[c.st]}</span></td></tr>`; }).join('')}</table>
+    <h2>5. Ressalvas e pendências</h2>
+    ${ress.length ? `<ul>${ress.map(x => `<li>${x}</li>`).join('')}</ul>` : '<p>Nenhuma ressalva nas verificações de cálculo.</p>'}
+    <h2>6. Condicionantes</h2>
+    <ul><li>Pesos das cargas conferidos com o projeto/romaneio antes do içamento; se o peso real for maior que o considerado, o içamento não pode ser feito sem revisão.</li>
+      <li>Munck e acessórios inspecionados e aprovados nos checklists do dia; acessórios com identificação de CMT legível.</li>
+      <li>Patolamento, raio máximo, isolamento e limite de vento conforme o Plano de Rigging.</li>
+      <li>Equipe capacitada e autorizada; APR e Permissão de Trabalho emitidas.</li></ul>
+    <div class="keep"><h2>7. Conclusão</h2>
+    <div class="verdict ${R.st}">${concl}</div>
+    ${notaLegal()}
+    ${assinaturas([[o.respTecnico, 'Responsável técnico — CREA ' + txt(o.crea, '______')], ['', 'ART nº ' + txt(o.art, '______') + ' — Local e data']])}</div>`;
+}
+function renderChecklists(R){
+  const o = S.obra, m = S.munck, L = S.local;
+  const linhas = itens => itens.map((t, i) => `<tr><td class="c">${i+1}</td><td>${t}</td><td class="c"><span class="box"></span></td><td class="c"><span class="box"></span></td><td class="c"><span class="box"></span></td><td></td></tr>`).join('');
+  const cab = `<tr><th class="c" style="width:5%">Nº</th><th>Item</th><th class="c" style="width:6%">OK</th><th class="c" style="width:6%">NC</th><th class="c" style="width:6%">N/A</th><th style="width:22%">Observação</th></tr>`;
+  const rMaxIso = Math.max(0, ...R.cs.map(c => isFinite(c.Riso) ? c.Riso : 0));
+  const acess = [];
+  S.icamentos.forEach((ic, i) => { const c = R.cs[i];
+    acess.push([i+1, `${LINGA_NOME[ic.lingaTipo]} — ${f(c.Lc)} m`, c.n, f(c.cmt,0)]);
+    if(c.manQ > 0) acess.push([i+1, 'Manilha', f(c.manQ,0), f(c.manCmt,0)]);
+    if(c.bal){ acess.push([i+1, `Balancim ${f(num(ic.balComp))} m`, 1, f(num(ic.balCmt),0)]); acess.push([i+1, `Linga superior do balancim — ${f(num(ic.supComp))} m`, 2, f(num(ic.supCmt),0)]); }
+  });
+  $('#doc-checklists').innerHTML = docHeader('Checklists de Içamento') + `
+    <table class="t"><tr><th style="width:16%">Equipamento</th><td>${txt(m.marca)} ${txt(m.modelo, '')} — placa ${txt(m.placa)}</td><th style="width:12%">Operador</th><td>${txt(o.operador)}</td><th style="width:8%">Data</th><td style="width:14%">____/____/______</td></tr></table>
+    <h2>A. Inspeção pré-uso do munck</h2>
+    <table class="t">${cab}${linhas([
+      'Documentos do veículo, manual e tabela de carga legível fixada no equipamento',
+      'Inspeção periódica / laudo do munck dentro da validade, com ART',
+      'Operador capacitado e autorizado, com CNH compatível e ASO válido',
+      'Coluna, lanças e extensões sem trincas, deformações ou corrosão acentuada',
+      'Pinos, travas e contrapinos presentes e íntegros',
+      'Cilindros hidráulicos sem vazamento; hastes sem riscos ou amassados',
+      'Mangueiras, tubos e conexões sem vazamento, ressecamento ou atrito',
+      'Nível do óleo hidráulico correto',
+      'Válvulas de retenção atuando: a carga não desce com os comandos em neutro',
+      'Limitador de momento / dispositivo de sobrecarga funcionando (quando houver)',
+      'Comandos identificados, voltando sozinhos ao neutro; parada de emergência funcionando',
+      'Gancho com trava de segurança, girando livre, sem deformação ou abertura',
+      'Patolas: extensão, travas, cilindros e sapatas em bom estado',
+      'Calços das patolas disponíveis nas dimensões do plano e sem trincas',
+      'Pneus, freio de estacionamento e calços de roda',
+      'Giro sem folga excessiva nem ruído anormal',
+      'Extintor, cones, fita de isolamento e alarme sonoro'])}</table>
+    <h2>B. Inspeção dos acessórios de içamento</h2>
+    <table class="t"><tr><th class="c">Içam.</th><th>Acessório previsto no plano</th><th class="c">Qtd.</th><th class="n">CMT (kg)</th><th>Identificação / TAG</th><th class="c">Aprovado</th><th class="c">Reprovado</th></tr>
+      ${acess.map(a => `<tr><td class="c">${a[0]}</td><td>${a[1]}</td><td class="c">${a[2]}</td><td class="n">${a[3]}</td><td></td><td class="c"><span class="box"></span></td><td class="c"><span class="box"></span></td></tr>`).join('')}</table>
+    <table class="t">${cab}${linhas([
+      'Todos os acessórios com etiqueta/plaqueta de CMT legível e certificado do fabricante',
+      'Cintas: sem cortes, furos, queimaduras, costuras rompidas, nós ou desgaste que exponha os fios',
+      'Cabos de aço: sem arames rompidos acima do permitido, amassamentos, “gaiola de passarinho”, dobras ou corrosão; presilhas e olhais íntegros',
+      'Correntes: sem elos alongados, trincados, torcidos ou gastos',
+      'Manilhas: pino original, rosca perfeita, sem deformação ou desgaste; pino totalmente rosqueado',
+      'Balancim: sem trincas ou deformações, olhais íntegros, CMT identificada',
+      'Protetores de canto disponíveis para arestas vivas',
+      'Cabos-guia em bom estado e com comprimento suficiente'])}</table>
+    <h2 class="pb">C. Liberação do içamento (preencher no dia, antes de cada frente)</h2>
+    <table class="t">${cab}${linhas([
+      'Plano de rigging assinado e disponível na frente de serviço; equipe leu e entendeu',
+      'APR e Permissão de Trabalho emitidas; DDS realizado',
+      'Peso da carga conferido com o projeto / romaneio',
+      'Caminhão na posição do plano; raio máximo conferido com trena',
+      'Solo firme; calços posicionados; patolas totalmente abertas; equipamento nivelado; rodas calçadas',
+      `Área isolada e sinalizada (raio mínimo ${rMaxIso ? f(rMaxIso,1) : '____'} m)`,
+      `Vento medido: ______ km/h (limite ${f(n0(L.vento),0)} km/h; telhas ${f(n0(L.ventoTelha),0)} km/h)`,
+      'Sem chuva forte, raios ou baixa visibilidade',
+      'Distância de redes elétricas conferida',
+      'Acessórios inspecionados e montados conforme a ficha de içamento; cantos vivos protegidos',
+      'Cabos-guia instalados',
+      'Comunicação testada (sinais / rádio) e sinaleiro definido',
+      'Equipe com EPI; trabalho em altura com ancoragem e linha de vida',
+      'Içamento de teste (20 cm) realizado sem anormalidades'])}</table>
+    <p><b>Liberação:</b> <span class="box"></span> Liberado &nbsp;&nbsp; <span class="box"></span> Não liberado — motivo: ________________________________________________</p>
+    ${assinaturas([[o.operador, 'Operador do munck'], [o.sinaleiro, 'Sinaleiro / amarrador'], [o.supervisor, 'Supervisor do içamento'], [o.tst, 'Técnico de segurança']])}`;
+}
+function renderDocs(){
+  const R = calcTudo();
+  renderPlano(R); renderMemorial(R); renderLaudo(R); renderChecklists(R);
+  return R;
+}
+
+/* ---------- Navegação e ações ---------- */
+function mostrarAba(aba){
+  abaAtual = aba;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === aba));
+  const dados = aba === 'dados';
+  $('#view-dados').style.display = dados ? '' : 'none';
+  $('#view-docs').style.display = dados ? 'none' : '';
+  if(dados) renderForm();
+  else {
+    renderDocs();
+    document.querySelectorAll('.doc').forEach(d => d.style.display = d.id === 'doc-' + aba ? '' : 'none');
+    window.scrollTo(0, 0);
+  }
+}
+function imprimir(qual){
+  const R = renderDocs();
+  if(R.st === 'pend' && !confirm('Ainda faltam dados para concluir as verificações. Os documentos sairão marcados como “DADOS INCOMPLETOS”. Imprimir mesmo assim?')) return;
+  if(R.st === 'fail' && !confirm('Há verificações REPROVADAS. Os documentos sairão marcados como “REPROVADO”. Imprimir mesmo assim?')) return;
+  document.body.dataset.print = qual;
+  const antigo = document.title;
+  document.title = `${qual === 'all' ? 'Plano de Rigging completo' : ({ plano:'Plano de Rigging', memorial:'Memorial de Calculo', laudo:'Laudo Tecnico', checklists:'Checklists' }[qual])} ${S.obra.numero || ''} ${S.obra.nome || ''}`.trim();
+  window.print();
+  document.title = antigo;
+}
+function baixar(nome, texto){
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([texto], { type:'application/json' }));
+  a.download = nome; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+const ACOES = {
+  'novo'(){ if(confirm('Começar um plano novo? Os dados do plano atual serão apagados deste navegador (os muncks salvos continuam).')){ S = novoPlano(); salvar(); renderForm(); } },
+  'exemplo'(){ if(confirm('Preencher com um exemplo fictício? Os dados atuais serão substituídos. Os números do exemplo servem só para demonstração.')){ S = planoExemplo(); salvar(); renderForm(); } },
+  'export'(){ baixar(`plano-rigging-${(S.obra.numero || 'sem-numero').replace(/[^\w-]+/g,'_')}.json`, JSON.stringify(S, null, 2)); },
+  'import'(){ $('#file-import').click(); },
+  'add-telha'(){ S.icamentos.push(novoIcamento('telha')); salvar(); renderForm(); },
+  'add-estr'(){ S.icamentos.push(novoIcamento('estrutura')); salvar(); renderForm(); },
+  'dup-ic'(el){ const i = +el.dataset.i; S.icamentos.splice(i + 1, 0, { ...S.icamentos[i], id:uid() }); salvar(); renderForm(); },
+  'del-ic'(el){ if(confirm('Excluir este içamento?')){ S.icamentos.splice(+el.dataset.i, 1); salvar(); renderForm(); } },
+  'add-row'(){ S.munck.tabela.push({ raio:'', cap:'' }); salvar(); renderForm(); },
+  'del-row'(el){ S.munck.tabela.splice(+el.dataset.i, 1); if(!S.munck.tabela.length) S.munck.tabela.push({ raio:'', cap:'' }); salvar(); renderForm(); },
+  'save-munck'(){
+    const nome = nomeMunck(S.munck);
+    if(!nome){ alert('Informe pelo menos a marca e o modelo do munck antes de salvar.'); return; }
+    const lista = muncksSalvos(), i = lista.findIndex(x => nomeMunck(x) === nome);
+    const copia = JSON.parse(JSON.stringify(S.munck));
+    if(i >= 0) lista[i] = copia; else lista.push(copia);
+    try{ localStorage.setItem(LS_MUNCKS, JSON.stringify(lista)); }catch(e){}
+    renderForm(); alert(`Munck “${nome}” salvo. Nos próximos planos é só escolher na lista “Muncks salvos”.`);
+  },
+  'load-munck'(){
+    const i = $('#sel-munck').value; if(i === '') { alert('Escolha um munck na lista.'); return; }
+    S.munck = { ...novoPlano().munck, ...JSON.parse(JSON.stringify(muncksSalvos()[+i])) }; salvar(); renderForm();
+  },
+  'del-munck'(){
+    const i = $('#sel-munck').value; if(i === '') { alert('Escolha um munck na lista.'); return; }
+    const lista = muncksSalvos();
+    if(!confirm(`Apagar “${nomeMunck(lista[+i])}” da lista de muncks salvos?`)) return;
+    lista.splice(+i, 1); try{ localStorage.setItem(LS_MUNCKS, JSON.stringify(lista)); }catch(e){}
+    renderForm();
+  },
+  'print'(){ if(abaAtual === 'dados') mostrarAba('plano'); imprimir(abaAtual); },
+  'print-all'(){ if(abaAtual === 'dados') mostrarAba('plano'); imprimir('all'); }
+};
+document.addEventListener('click', e => {
+  const tab = e.target.closest('.tab'); if(tab){ mostrarAba(tab.dataset.tab); return; }
+  const el = e.target.closest('[data-act]'); if(el && ACOES[el.dataset.act]) ACOES[el.dataset.act](el);
+});
+function aoEditar(e){
+  const el = e.target.closest('[data-path]'); if(!el) return;
+  const path = el.dataset.path;
+  setPath(path, el.value);
+  if(path.endsWith('.telhaModelo')){ const t = TELHAS.find(x => x.id === el.value); if(t && t.kgm2) setPath(path.replace('telhaModelo', 'kgm2'), t.kgm2); }
+  if(path === 'local.soloTipo'){ const s = SOLOS.find(x => x.id === el.value); if(s && s.sigma) S.local.sigma = s.sigma; }
+  salvar();
+  if(el.dataset.rr && e.type === 'change') renderForm(); else atualizarResultados();
+}
+document.addEventListener('input', aoEditar);
+document.addEventListener('change', aoEditar);
+$('#file-import').addEventListener('change', async e => {
+  const file = e.target.files[0]; e.target.value = ''; if(!file) return;
+  try{
+    const p = JSON.parse(await file.text());
+    if(!p || typeof p !== 'object' || !p.munck || !p.icamentos) throw new Error('formato');
+    S = normalizar(p); salvar(); mostrarAba('dados');
+  }catch(err){ alert('Não foi possível ler este arquivo. Use um arquivo gerado pelo botão “Exportar plano”.'); }
+});
+window.addEventListener('afterprint', () => { delete document.body.dataset.print; });
+
+$('#logo-top').src = LOGO_DATA_URI;
+$('#ver').textContent = RIG_VERSION;
+(function(){ const l = document.createElement('link'); l.rel = 'icon'; l.href = LOGO_DATA_URI; document.head.appendChild(l); })();
+renderForm();
+</script>
+</body>
+</html>
